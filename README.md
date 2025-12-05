@@ -7,8 +7,8 @@ A powerful Windows application to save and restore your desktop icon positions w
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![GitHub release](https://img.shields.io/github/release/mapi68/DesktopIconBackupManager.svg)](releases)
 [![GitHub release date](https://img.shields.io/github/release-date/mapi68/DesktopIconBackupManager.svg)](releases)
-[![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/DesktopIconBackupManager/total.svg)](releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/mapi68/DesktopIconBackupManager.svg)](commits/master)
+[![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/DesktopIconBackupManager/total.svg)](releases)
 ---
 
 ## 🌟 Features
