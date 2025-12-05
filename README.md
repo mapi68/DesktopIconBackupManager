@@ -5,6 +5,11 @@ A powerful Windows application to save and restore your desktop icon positions w
 ![Version](https://img.shields.io/badge/version-0.5-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![GitHub release](https://img.shields.io/github/release/mapi68/DesktopIconBackupManager.svg)](releases)
+[![GitHub release date](https://img.shields.io/github/release-date/mapi68/DesktopIconBackupManager.svg)](releases)
+[![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/DesktopIconBackupManager/total.svg)](releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/mapi68/DesktopIconBackupManager.svg)](commits/master)
+---
 
 ## 🌟 Features
 
@@ -41,13 +46,14 @@ A powerful Windows application to save and restore your desktop icon positions w
 
 ### Option 1: Download Pre-compiled Executable (Recommended)
 1. Download the latest `DesktopIconBackupManager.exe` from the [Releases](../../releases) page
-2. Run the executable - no installation required!
+2. Extract in a folder
+3. Run the executable - no installation required!
 
 ### Option 2: Run from Source
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/desktop-icon-backup-manager.git
-   cd desktop-icon-backup-manager
+   git clone https://github.com/mapi68/DesktopIconBackupManager.git
+   cd DesktopIconBackupManager
    ```
 
 2. Install dependencies:
@@ -57,7 +63,7 @@ A powerful Windows application to save and restore your desktop icon positions w
 
 3. Run the application:
    ```bash
-   python desktop_icon_backup_manager.py
+   python DesktopIconBackupManager.py
    ```
 
 ### Dependencies
@@ -71,12 +77,11 @@ pywin32
 ### Basic Operations
 
 #### Saving Your Layout
-1. Click **"💾 Save Quick Backup"** for an instant backup with timestamp
-2. Or click **"↺ RESTORE (Select Backup)"** to save with a custom tag
+1. Click **"💾 SAVE QUICK BACKUP"** for an instant backup with timestamp
 
 #### Restoring Your Layout
 1. Click **"↺ RESTORE LATEST"** to restore from the most recent backup
-2. Or click **"↺ RESTORE (Select Backup)"** to choose from all available backups
+2. Or click **"↺ BACKUP MANAGER"** to choose from all available backups
 
 ### Advanced Features
 
