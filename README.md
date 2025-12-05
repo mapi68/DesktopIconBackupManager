@@ -1,0 +1,2 @@
+# DesktopIconBackupManager
+The Desktop Icon Backup Manager is a utility that allows users to save, restore, and manage the positions of Windows desktop icons, including support for adaptive scaling across different screen resolutions
