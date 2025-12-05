@@ -1,0 +1,125 @@
+# Workflow name
+name: Build
+
+# Trigger workflow on manual trigger
+on:
+  workflow_dispatch:
+
+# Set required permissions for the workflow
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    # Set permissions at job level
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Get Python version from PATH
+      - name: Get Python version
+        id: python-version
+        run: |
+          $pythonVersion = (python --version).Split(" ")[1]
+          echo "version=$pythonVersion" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      # Setup Python environment with version from PATH
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ steps.python-version.outputs.version }}
+
+      # Install required build tools
+      - name: Install pyinstaller
+        run: pip install pyinstaller
+
+      - name: Install pipreqs
+        run: pip install pipreqs
+
+      # Generate requirements.txt from project imports
+      - name: Generate requirements.txt
+        run: |
+          pipreqs --force .
+
+      # Commit requirements.txt to the repository (Added to fulfill your request)
+      - name: Commit requirements.txt
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'feat(build): Generate and update requirements.txt'
+          file_pattern: requirements.txt
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # Install UPX for executable compression
+      - name: Set up UPX
+        run: |
+          choco install upx -y
+
+      # Build the executable using pyinstaller
+      - name: Build EXE
+        run: |
+          pyinstaller DesktopIconBackupManager.spec
+
+      # Move the built executable from dist folder
+      - name: Create artifact
+        run: |
+          cd dist
+          move DesktopIconBackupManager_*.exe ..
+
+      # Create artifact folder and copy executable 
+      - name: Copy executable files
+        run: |
+          mkdir artifact_contents
+          move DesktopIconBackupManager_*.exe artifact_contents/
+
+      # Extract version number from executable filename (format: x.x.x.x)
+      - name: Extract version number
+        id: get_version
+        shell: pwsh
+        run: |
+          $exeFile = Get-ChildItem artifact_contents/DesktopIconBackupManager_*.exe | Select-Object -First 1
+          if ($exeFile) {
+              $version = $exeFile.Name -replace 'DesktopIconBackupManager_(.+)\.exe', '$1'
+              echo "version=$version" >> $env:GITHUB_OUTPUT
+          } else {
+              echo "Error: No matching exe file found"
+              exit 1
+          }
+
+      # Upload build artifacts
+      - name: Save ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DesktopIconBackupManager
+          path: artifact_contents/
+
+      # Create ZIP file for release
+      - name: Create Release ZIP
+        run: |
+          Compress-Archive -Path artifact_contents/* -DestinationPath DesktopIconBackupManager.zip
+
+      # Create GitHub release with version from executable
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: DesktopIconBackupManager.zip
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: v${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
