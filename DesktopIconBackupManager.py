@@ -19,7 +19,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QSystemTrayIcon)
 from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
                           QSize, QStandardPaths, QCoreApplication, QRect, QPoint)
-from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon)
+from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
+                         QColor, QPen)
 
 # --- AUTOMATIC VERSIONING ---
 now = datetime.now()
@@ -121,6 +122,46 @@ def get_readable_date(filename: str) -> str:
 
 def get_resolution_from_filename(filename: str) -> str:
     return parse_backup_filename(filename)[1]
+
+
+# --- WIDGET: VISUAL PREVIEW ---
+class IconPreviewWidget(QWidget):
+    """A widget that renders a mini-map of the saved icon layout."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(220, 124)  # 16:9 ratio approximately
+        self.icons = {}
+        self.screen_res = (1920, 1080)
+        self.setStyleSheet("background-color: #1a1a1a; border: 2px solid #333; border-radius: 4px;")
+
+    def update_preview(self, icons: Dict, res_tuple: Tuple[int, int]):
+        """Update the preview with new icon positions and resolution."""
+        self.icons = icons
+        self.screen_res = res_tuple if res_tuple else (1920, 1080)
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        if not self.icons:
+            painter.setPen(QColor("#666"))
+            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "No Preview Available")
+            return
+
+        # Calculate scaling factors
+        scale_x = self.width() / self.screen_res[0]
+        scale_y = self.height() / self.screen_res[1]
+
+        # Draw icons as small dots
+        painter.setPen(QPen(QColor("#0078d7"), 3))
+        for pos in self.icons.values():
+            x = int(pos[0] * scale_x)
+            y = int(pos[1] * scale_y)
+            # Basic clipping within preview bounds
+            x = max(2, min(x, self.width() - 2))
+            y = max(2, min(y, self.height() - 2))
+            painter.drawPoint(x, y)
 
 
 # --- BACKEND: Icon management logic ---
@@ -568,29 +609,55 @@ class BackupManagerWindow(QDialog):
         super().__init__(parent)
         self.manager = manager
         self.setWindowTitle("Select, Restore, or Delete Backup")
-        self.setFixedSize(600, 400)
+        self.setFixedSize(800, 450)
 
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(10)
 
         self.layout.addWidget(QLabel("Select a backup to restore or right-click to delete."))
 
-        # List header/Format
+        # --- HORIZONTAL SPLIT: List and Preview Panel ---
+        h_split = QHBoxLayout()
+
+        # Left side: List of backups
+        left_panel = QVBoxLayout()
+
+        # List header
         header_text = (
-            f"{'TAG/DESCRIPTION':<44} "
+            f"{'TAG/DESCRIPTION':<30} "
             f"| {'RESOLUTION':<10} "
             f"| {'ICONS':<5} "
             f"| TIMESTAMP"
         )
         header_label = QLabel(header_text)
         header_label.setStyleSheet("font-family: 'Consolas', monospace; font-size: 11px; font-weight: bold; margin-bottom: 2px;")
-        self.layout.addWidget(header_label)
+        left_panel.addWidget(header_label)
 
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.list_widget.setStyleSheet("font-family: 'Consolas', monospace; font-size: 11px;")
-        self.layout.addWidget(self.list_widget)
+        left_panel.addWidget(self.list_widget)
 
+        h_split.addLayout(left_panel, 3)
+
+        # Right side: Preview and Info Panel
+        right_panel = QVBoxLayout()
+        right_panel.addWidget(QLabel("Layout Preview:"))
+
+        self.preview_widget = IconPreviewWidget()
+        right_panel.addWidget(self.preview_widget)
+
+        self.info_label = QLabel("Select a backup to see details.")
+        self.info_label.setWordWrap(True)
+        self.info_label.setStyleSheet("color: #555; font-size: 11px; padding: 10px;")
+        right_panel.addWidget(self.info_label)
+        right_panel.addStretch()
+
+        h_split.addLayout(right_panel, 1)
+        self.layout.addLayout(h_split)
+        # --- END HORIZONTAL SPLIT ---
+
+        # Buttons
         button_layout = QHBoxLayout()
 
         self.btn_restore = QPushButton("Restore Selected Layout")
@@ -606,7 +673,7 @@ class BackupManagerWindow(QDialog):
         button_layout.addWidget(self.btn_close)
         self.layout.addLayout(button_layout)
 
-        self.list_widget.itemSelectionChanged.connect(self.update_button_states)
+        self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
         self.list_widget.itemDoubleClicked.connect(self.restore_selected)
         self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
@@ -637,7 +704,7 @@ class BackupManagerWindow(QDialog):
                 pass
 
             # Format the item text: [Tag] [Res] [Count] Timestamp
-            description_display = f"{f'[{description[:42]}]':<45}"
+            description_display = f"{f'[{description[:28]}]':<31}"
             resolution_display = f"| {resolution:<10}"
             icon_count_display = f"| {icon_count:>5}"
 
@@ -653,6 +720,45 @@ class BackupManagerWindow(QDialog):
             self.list_widget.addItem(item)
 
         self.update_button_states()
+
+    def on_selection_changed(self):
+        """Handle selection change to update preview and info."""
+        items = self.list_widget.selectedItems()
+        if not items:
+            self.preview_widget.update_preview({}, (1920, 1080))
+            self.info_label.setText("Select a backup to see details.")
+            self.btn_restore.setEnabled(False)
+            return
+
+        filename = items[0].data(Qt.ItemDataRole.UserRole)
+        filepath = os.path.join(BACKUP_DIR, filename)
+
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                icons = data.get("icons", {})
+                res_str = parse_backup_filename(filename)[1]
+                res_tuple = parse_resolution_string(res_str)
+
+                # Update preview widget
+                self.preview_widget.update_preview(icons, res_tuple)
+
+                # Update info label
+                description = data.get('description', 'None')
+                timestamp = data.get('timestamp', 'N/A')
+                info_text = (
+                    f"File: {filename}\n"
+                    f"Icons: {len(icons)}\n"
+                    f"Resolution: {res_str}\n"
+                    f"Description: {description}\n"
+                    f"Timestamp: {timestamp}"
+                )
+                self.info_label.setText(info_text)
+                self.btn_restore.setEnabled(True)
+        except Exception as e:
+            self.preview_widget.update_preview({}, (1920, 1080))
+            self.info_label.setText(f"Error loading backup:\n{str(e)}")
+            self.btn_restore.setEnabled(False)
 
     def update_button_states(self):
         has_selection = bool(self.list_widget.selectedItems())
@@ -1068,6 +1174,7 @@ class MainWindow(QMainWindow):
             "<ul>"
             "<li>**Quick Save:** Save icons with an optional descriptive tag.</li>"
             "<li>**Backup Management:** Select, restore, or delete specific backups in a dedicated window.</li>"
+            "<li>**Visual Preview:** See a mini-map of your icon layout before restoring.</li>"
             "<li>**Adaptive Scaling:** Option to automatically scale icon positions for different monitor resolutions.</li>"
             "<li>**Automatic Cleanup:** Set a maximum limit on the number of backups to keep.</li>"
             "<li>**Random Scramble:** Randomize icon positions after an automatic backup.</li>"
