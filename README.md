@@ -20,6 +20,7 @@ A powerful Windows application to save and restore your desktop icon positions w
 - **📊 Resolution Tracking**: Automatically records screen resolution with each backup
 
 ### Advanced Features
+- **🖼️ Visual Layout Preview**: See a mini-map of your icon arrangement before restoring
 - **🔄 Adaptive Scaling**: Automatically adjusts icon positions when restoring to different screen resolutions
 - **🖥️ Multi-Monitor Support**: Detects and handles multiple monitor configurations
 - **🗑️ Smart Cleanup**: Automatic deletion of old backups (configurable limits: 5, 10, 25, 50, or unlimited)
