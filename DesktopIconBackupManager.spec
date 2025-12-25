@@ -12,7 +12,10 @@ a = Analysis(
     py_files,
     pathex=[],
     binaries=[],
-    datas=[('icon.ico', '.')],
+    datas=[
+        ('icon.ico', '.'),
+        ('i18n/*', 'i18n')  
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -38,7 +41,7 @@ exe = EXE(
     strip=False,
     upx=True,
     upx_exclude=[],
-	icon='icon.ico',
+    icon='icon.ico',
     runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
@@ -47,5 +50,3 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
-
-
