@@ -250,14 +250,14 @@ class DesktopIconManager:
 
         if current_count <= max_count:
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup skipped: Current count (%1) is within the limit (%2).").replace("%1", str(current_count)).replace("%1", str(max_count)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup skipped: Current count (%1) is within the limit (%2).").replace("%1", str(current_count)).replace("%2", str(max_count)))
             return
 
         files_to_delete = backup_files[max_count:]
         deleted_count = 0
 
         #
-        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %3 oldest files.").replace("%1", str(current_count)).replace("%1", str(max_count)).replace("%1", str(len(files_to_delete))))
+        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %3 oldest files.").replace("%1", str(current_count)).replace("%2", str(max_count)).replace("%3", str(len(files_to_delete))))
 
         for filename in files_to_delete:
             if self.delete_backup(filename):
@@ -337,7 +337,7 @@ class DesktopIconManager:
                 json.dump(profile_data, f, indent=4)
 
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Saved %1 icons to backup file '%2'").replace("%1", str(len(icons))).replace("%1", str(filename)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Saved %1 icons to backup file '%2'").replace("%1", str(len(icons))).replace("%2", str(filename)))
             if description:
                 #
                 log_callback(QCoreApplication.translate("DesktopIconManager", "  (Description: %1)").replace("%1", str(description)))
@@ -419,8 +419,8 @@ class DesktopIconManager:
             scale_y = current_height / saved_height
             scaling_active = True
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Adaptive Scaling enabled: Saved %1x%2 -> Current %3x%4").replace("%1", str(saved_width)).replace("%1", str(saved_height)).replace("%1", str(current_width)).replace("%1", str(current_height)))
-            log_callback(QCoreApplication.translate("DesktopIconManager", "  **[SCALING APPLIED]** Scaling factors: X=%1, Y=%2").replace("%1", str(f"{scale_x:.3f}")).replace("%1", str(f"{scale_y:.3f}")))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Adaptive Scaling enabled: Saved %1x%2 -> Current %3x%4").replace("%1", str(saved_width)).replace("%2", str(saved_height)).replace("%3", str(current_width)).replace("%4", str(current_height)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "  **[SCALING APPLIED]** Scaling factors: X=%1, Y=%2").replace("%1", str(f"{scale_x:.3f}")).replace("%2", str(f"{scale_y:.3f}")))
         else:
             if enable_scaling:
                 #
@@ -1260,7 +1260,7 @@ class MainWindow(QMainWindow):
         reply = QMessageBox.question(
             self, self.tr("Confirm Restore"),
             self.tr("Restore icon positions from the LATEST backup file:\n\nFile: %1\nResolution: %2\nIcons: %3\nTag: %4\nTimestamp: %5\n\nAre you sure you want to proceed?")
-            .replace("%1", str(latest_backup_file)).replace("%1", str(resolution)).replace("%1", str(icon_count)).replace("%1", str(description)).replace("%1", str(formatted_date)),
+            .replace("%1", str(latest_backup_file)).replace("%2", str(resolution)).replace("%3", str(icon_count)).replace("%4", str(description)).replace("%5", str(formatted_date)),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
@@ -1356,11 +1356,11 @@ class MainWindow(QMainWindow):
 
         if saved_count != current_count:
             #
-            self.log(self.tr("⚠ Warning: Saved (%1 monitors) vs Current (%2 monitors).").replace("%1", str(saved_count)).replace("%1", str(current_count)))
+            self.log(self.tr("⚠ Warning: Saved (%1 monitors) vs Current (%2 monitors).").replace("%1", str(saved_count)).replace("%2", str(current_count)))
             QMessageBox.warning(
                 self, self.tr("Monitor Mismatch Warning"),
                 self.tr("The layout was saved with %1 monitor(s), but you currently have %2 monitor(s) connected.\n\nIcon positions have been restored, but they may be inaccurate.")
-                .replace("%1", str(saved_count)).replace("%1", str(current_count))
+                .replace("%1", str(saved_count)).replace("%2", str(current_count))
             )
             return
 
