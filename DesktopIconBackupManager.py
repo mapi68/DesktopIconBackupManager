@@ -634,7 +634,7 @@ class BackupManagerWindow(QDialog):
 
         #
         header_text = (
-            f"{self.tr('TAG/DESCRIPTION'):<30} "
+            f"{self.tr('TAG/DESCRIPTION'):<40} "
             f"| {self.tr('RESOLUTION'):<10} "
             f"| {self.tr('ICONS'):<5} "
             f"| {self.tr('TIMESTAMP')}"
@@ -715,7 +715,7 @@ class BackupManagerWindow(QDialog):
             except Exception:
                 pass
 
-            description_display = f"{f'[{description[:28]}]':<31}"
+            description_display = f"{f'[{description[:38]}]':<41}"
             resolution_display = f"| {resolution:<10}"
             icon_count_display = f"| {icon_count:>5}"
 
