@@ -1,11 +1,8 @@
-# Workflow name
 name: Build
 
-# Trigger workflow on manual trigger
 on:
   workflow_dispatch:
 
-# Set required permissions for the workflow
 permissions:
   contents: write
   packages: write
@@ -14,17 +11,11 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: write
-      packages: write
-      actions: write
-
     steps:
-      # Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Get version from version.txt
+      # Legge la versione dal file version.txt
       - name: Get App Version
         id: app_version
         shell: pwsh
@@ -33,7 +24,6 @@ jobs:
           $version = $version.Trim()
           echo "version=$version" >> $env:GITHUB_OUTPUT
 
-      # Get Python version from PATH
       - name: Get Python version
         id: python-version
         run: |
@@ -41,66 +31,49 @@ jobs:
           echo "version=$pythonVersion" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
-      # Setup Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.python-version.outputs.version }}
 
-      # Install required build tools
       - name: Install build tools
-        run: |
-          pip install pyinstaller pipreqs
+        run: pip install pyinstaller pipreqs
 
-      # Generate requirements.txt
       - name: Generate requirements.txt
-        run: |
-          pipreqs --force .
+        run: pipreqs --force .
 
-      # Commit requirements.txt if changed
       - name: Commit requirements.txt
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'feat(build): update requirements.txt'
           file_pattern: requirements.txt
 
-      # Install dependencies
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      # Install UPX for compression
       - name: Set up UPX
-        run: |
-          choco install upx -y
+        run: choco install upx -y
 
-      # Build the executable
       - name: Build EXE
-        run: |
-          pyinstaller DesktopIconBackupManager.spec
+        run: pyinstaller DesktopIconBackupManager.spec
 
-      # Prepare artifacts
       - name: Create artifact folder
         shell: pwsh
         run: |
           mkdir artifact_contents
           move dist\DesktopIconBackupManager_*.exe artifact_contents/
 
-      # Save artifacts
       - name: Save ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: DesktopIconBackupManager-v${{ steps.app_version.outputs.version }}
           path: artifact_contents/
 
-      # Create Release ZIP
       - name: Create Release ZIP
         shell: pwsh
-        run: |
-          Compress-Archive -Path artifact_contents/* -DestinationPath DesktopIconBackupManager.zip
+        run: Compress-Archive -Path artifact_contents/* -DestinationPath DesktopIconBackupManager.zip
 
-      # Create GitHub release
-      - name: Create Release
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
           files: DesktopIconBackupManager.zip

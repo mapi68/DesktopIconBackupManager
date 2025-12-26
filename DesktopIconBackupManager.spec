@@ -12,7 +12,6 @@ except Exception:
     VERSIONE = "0.0.0"
 # ------------------------------------------
 
-# Automatically include all .py files in the directory
 py_files = glob.glob("*.py")
 
 a = Analysis(
@@ -22,7 +21,7 @@ a = Analysis(
     datas=[
         ('icon.ico', '.'),
         ('i18n/*', 'i18n'),
-        ('version.txt', '.')  # Added to include version.txt in the bundle
+        ('version.txt', '.')
     ],
     hiddenimports=[],
     hookspath=[],

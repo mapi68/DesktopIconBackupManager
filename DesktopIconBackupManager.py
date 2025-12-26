@@ -25,7 +25,6 @@ from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter
 
 # --- VERSIONING (Read from version.txt) ---
 try:
-    # Use resource_path to find version.txt whether running as script or EXE
     v_path = resource_path("version.txt")
     if os.path.exists(v_path):
         with open(v_path, "r", encoding="utf-8") as f:
