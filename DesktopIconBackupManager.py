@@ -23,22 +23,18 @@ from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
 from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
                          QColor, QPen)
 
-# --- AUTOMATIC VERSIONING (Based on source/executable modification) ---
+# --- VERSIONING (Read from version.txt) ---
 try:
-    # Check if running as a bundled executable
-    if getattr(sys, 'frozen', False):
-        # Path to the .exe file
-        path = sys.executable
+    # Use resource_path to find version.txt whether running as script or EXE
+    v_path = resource_path("version.txt")
+    if os.path.exists(v_path):
+        with open(v_path, "r", encoding="utf-8") as f:
+            VERSION = f.read().strip()
     else:
-        # Path to the .py file
-        path = os.path.abspath(__file__)
-
-    mtime = os.path.getmtime(path)
-    last_mod = datetime.fromtimestamp(mtime)
-    VERSION = f"0.{last_mod.year % 10}.{last_mod.month}.{last_mod.day}"
+        VERSION = "0.0.0"
 except Exception:
     VERSION = "0.0.0"
-# ----------------------------------------------------------------------
+# ------------------------------------------
 
 # --- PYINSTALLER RESOURCE PATH FIX ---
 def resource_path(relative_path: str) -> str:

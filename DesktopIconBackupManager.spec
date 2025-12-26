@@ -1,23 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-import datetime
 import glob
 
 block_cipher = None
 
-# --- AUTOMATIC VERSIONING (Based on source file modification) ---
-# This ensures the version only changes when the code is actually edited
+# --- VERSIONING (Read from version.txt) ---
 try:
-    script_path = "DesktopIconBackupManager.py"
-    if os.path.exists(script_path):
-        mtime = os.path.getmtime(script_path)
-        last_mod = datetime.datetime.fromtimestamp(mtime)
-        VERSIONE = f"0.{last_mod.year % 10}.{last_mod.month}.{last_mod.day}"
-    else:
-        VERSIONE = "0.0.0"
+    with open("version.txt", "r", encoding="utf-8") as f:
+        VERSIONE = f.read().strip()
 except Exception:
     VERSIONE = "0.0.0"
-# ----------------------------------------------------------------
+# ------------------------------------------
 
 # Automatically include all .py files in the directory
 py_files = glob.glob("*.py")
@@ -28,7 +21,8 @@ a = Analysis(
     binaries=[],
     datas=[
         ('icon.ico', '.'),
-        ('i18n/*', 'i18n')
+        ('i18n/*', 'i18n'),
+        ('version.txt', '.')  # Added to include version.txt in the bundle
     ],
     hiddenimports=[],
     hookspath=[],
@@ -50,14 +44,12 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    # The output filename now matches the source code version
     name=f'DesktopIconBackupManager_{VERSIONE}.exe',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
-    icon='icon.ico',
     runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
@@ -65,4 +57,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='icon.ico',
 )

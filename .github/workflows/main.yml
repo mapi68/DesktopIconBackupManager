@@ -14,7 +14,6 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    # Set permissions at job level
     permissions:
       contents: write
       packages: write
@@ -25,6 +24,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Get version from version.txt
+      - name: Get App Version
+        id: app_version
+        shell: pwsh
+        run: |
+          $version = Get-Content version.txt -Raw
+          $version = $version.Trim()
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
       # Get Python version from PATH
       - name: Get Python version
         id: python-version
@@ -33,93 +41,72 @@ jobs:
           echo "version=$pythonVersion" >> $env:GITHUB_OUTPUT
         shell: pwsh
 
-      # Setup Python environment with version from PATH
+      # Setup Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.python-version.outputs.version }}
 
       # Install required build tools
-      - name: Install pyinstaller
-        run: pip install pyinstaller
+      - name: Install build tools
+        run: |
+          pip install pyinstaller pipreqs
 
-      - name: Install pipreqs
-        run: pip install pipreqs
-
-      # Generate requirements.txt from project imports
+      # Generate requirements.txt
       - name: Generate requirements.txt
         run: |
           pipreqs --force .
 
-      # Commit requirements.txt to the repository (Added to fulfill your request)
+      # Commit requirements.txt if changed
       - name: Commit requirements.txt
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'feat(build): Generate and update requirements.txt'
+          commit_message: 'feat(build): update requirements.txt'
           file_pattern: requirements.txt
 
-      # Install project dependencies
+      # Install dependencies
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      # Install UPX for executable compression
+      # Install UPX for compression
       - name: Set up UPX
         run: |
           choco install upx -y
 
-      # Build the executable using pyinstaller
+      # Build the executable
       - name: Build EXE
         run: |
           pyinstaller DesktopIconBackupManager.spec
 
-      # Move the built executable from dist folder
-      - name: Create artifact
-        run: |
-          cd dist
-          move DesktopIconBackupManager_*.exe ..
-
-      # Create artifact folder and copy executable 
-      - name: Copy executable files
-        run: |
-          mkdir artifact_contents
-          move DesktopIconBackupManager_*.exe artifact_contents/
-
-      # Extract version number from executable filename (format: x.x.x.x)
-      - name: Extract version number
-        id: get_version
+      # Prepare artifacts
+      - name: Create artifact folder
         shell: pwsh
         run: |
-          $exeFile = Get-ChildItem artifact_contents/DesktopIconBackupManager_*.exe | Select-Object -First 1
-          if ($exeFile) {
-              $version = $exeFile.Name -replace 'DesktopIconBackupManager_(.+)\.exe', '$1'
-              echo "version=$version" >> $env:GITHUB_OUTPUT
-          } else {
-              echo "Error: No matching exe file found"
-              exit 1
-          }
+          mkdir artifact_contents
+          move dist\DesktopIconBackupManager_*.exe artifact_contents/
 
-      # Upload build artifacts
+      # Save artifacts
       - name: Save ZIP artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DesktopIconBackupManager
+          name: DesktopIconBackupManager-v${{ steps.app_version.outputs.version }}
           path: artifact_contents/
 
-      # Create ZIP file for release
+      # Create Release ZIP
       - name: Create Release ZIP
+        shell: pwsh
         run: |
           Compress-Archive -Path artifact_contents/* -DestinationPath DesktopIconBackupManager.zip
 
-      # Create GitHub release with version from executable
+      # Create GitHub release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: DesktopIconBackupManager.zip
-          tag_name: v${{ steps.get_version.outputs.version }}
-          name: v${{ steps.get_version.outputs.version }}
+          tag_name: v${{ steps.app_version.outputs.version }}
+          name: Release v${{ steps.app_version.outputs.version }}
           draft: false
           prerelease: false
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
