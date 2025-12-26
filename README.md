@@ -188,7 +188,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the need to preserve desktop layouts across resolution changes
 
 ## 📸 Screenshots
-# Desktop Icon Backup Manager
 
 <p align="center">
   <img src="images/DIBM_1.png" width="80%" title="Main interface showing the activity log and three main action buttons">
