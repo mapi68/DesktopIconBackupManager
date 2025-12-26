@@ -23,16 +23,23 @@ from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
 from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
                          QColor, QPen)
 
-# --- VERSIONING (Read from version.txt) ---
+def resource_path(relative_path: str) -> str:
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
 try:
     v_path = resource_path("version.txt")
+
     if os.path.exists(v_path):
         with open(v_path, "r", encoding="utf-8") as f:
             VERSION = f.read().strip()
     else:
-        VERSION = "0.0.0"
-except Exception:
-    VERSION = "0.0.0"
+        VERSION = "0.0.0.0"
+except Exception as e:
+    VERSION = "0.0.0.0"
 # ------------------------------------------
 
 # --- PYINSTALLER RESOURCE PATH FIX ---
@@ -1185,7 +1192,7 @@ class MainWindow(QMainWindow):
                     "<li>**Tray Integration:** Quick access via system tray.</li>"
                     "</ul>"
                     "<p><b>Version:</b> %1</p>"
-                    "<p>Developed by: <b>mapi68</b></p>").replace("%1", str(VERSION))
+                    "<p>Developed by: <b>mapi68</b></p>").replace("%1", VERSION)
         )
 
     def confirm_and_delete_all_backups(self):
