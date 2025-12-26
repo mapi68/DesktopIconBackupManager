@@ -23,10 +23,19 @@ from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
 from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
                          QColor, QPen)
 
-# --- AUTOMATIC VERSIONING ---
-now = datetime.now()
-VERSION = f"0.{now.year % 10}.{now.month}.{now.day}"
-# ---------------------------
+# --- AUTOMATIC VERSIONING (Based on last file modification) ---
+try:
+    # Get the absolute path of the current script
+    file_path = os.path.abspath(__file__)
+    # Get the last modification timestamp
+    modification_time = os.path.getmtime(file_path)
+    last_mod = datetime.fromtimestamp(modification_time)
+    # Format: 0.Year(last digit).Month.Day
+    VERSION = f"0.{last_mod.year % 10}.{last_mod.month}.{last_mod.day}"
+except Exception:
+    # Fallback if file access fails
+    VERSION = "0.0.0"
+# -------------------------------------------------------------
 
 # --- PYINSTALLER RESOURCE PATH FIX ---
 def resource_path(relative_path: str) -> str:
