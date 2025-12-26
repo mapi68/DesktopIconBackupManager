@@ -188,10 +188,35 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the need to preserve desktop layouts across resolution changes
 
 ## 📸 Screenshots
+# Desktop Icon Backup Manager
 
-![](images/DIBM_1.png)
-![](images/DIBM_2.png)
-![](images/DIBM_3.png)
+<p align="center">
+  <img src="images/DIBM_1.png" width="80%" title="Main interface showing the activity log and three main action buttons">
+  <br><br>
+  <em>Main interface showing the activity log and three main action buttons</em>
+  <br><br><br>
+</p>
+
+<p align="center">
+  <img src="images/DIBM_2.png" width="80%" title="Backup Manager window with list of saved backups and layout preview">
+  <br><br>
+  <em>Backup Manager window with list of saved backups and layout preview</em>
+  <br><br><br>
+</p>
+
+<p align="center">
+  <img src="images/DIBM_3.png" width="50%" title="Confirmation dialog before restoring a backup">
+  <br><br>
+  <em>Confirmation dialog before restoring a backup</em>
+  <br><br><br>
+</p>
+
+<p align="center">
+  <img src="images/DIBM_4.png" width="80%" title="Desktop Icon Backup Manager featuring dark mode and Italian support">
+  <br><br>
+  <em>Desktop Icon Backup Manager featuring dark mode and Italian support</em>
+  <br><br><br>
+</p>
 
 ---
 
