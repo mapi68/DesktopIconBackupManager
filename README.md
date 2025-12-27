@@ -11,6 +11,15 @@ A powerful Windows application to save and restore your desktop icon positions w
 [![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/DesktopIconBackupManager/total.svg)](releases)
 ---
 
+## 📖 Documentation
+
+[![User Manual](https://img.shields.io/badge/manual-PDF-orange.svg?style=for-the-badge&logo=adobeacrobatreader)](https://mapi68.github.io/DesktopIconBackupManager/manual.pdf)
+
+> [!TIP]
+> You can always access the latest updated documentation at the following link: [User Manual (PDF)](https://mapi68.github.io/DesktopIconBackupManager/manual.pdf)
+
+---
+
 ## 🌟 Features
 
 ### Core Functionality
