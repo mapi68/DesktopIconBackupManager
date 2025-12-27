@@ -1,0 +1,23 @@
+name: Manual LaTeX Compilation
+
+on:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          # Ensure this matches your filename exactly
+          root_file: DesktopIconBackupManagerl.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DesktopIconBackup-PDF
+          path: DesktopIconBackupManagerl.pdf
