@@ -2,8 +2,8 @@
 
 A powerful Windows application to save and restore your desktop icon positions with advanced features like automatic backups, system tray integration, and adaptive scaling for multi-monitor setups.
 
-![Version](https://img.shields.io/badge/version-0.5-blue)
-![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org)
+[![Windows](https://img.shields.io/badge/Platform-Windows-0078D4?style=flat&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![GitHub release](https://img.shields.io/github/release/mapi68/DesktopIconBackupManager.svg)](releases)
 [![GitHub release date](https://img.shields.io/github/release-date/mapi68/DesktopIconBackupManager.svg)](releases)
