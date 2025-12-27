@@ -9,7 +9,7 @@ try:
     with open("version.txt", "r", encoding="utf-8") as f:
         VERSIONE = f.read().strip()
 except Exception:
-    VERSIONE = "0.0.0.0"
+    VERSIONE = "0.0.0"
 # ------------------------------------------
 
 py_files = glob.glob("*.py")

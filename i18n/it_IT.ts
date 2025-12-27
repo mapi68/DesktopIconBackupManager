@@ -164,7 +164,7 @@
         <message>
             <location filename="../DesktopIconBackupManager.py" line="260"/>
             <source>Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %3 oldest files.</source>
-            <translation>Pulizia necessaria: il numero attuale (%1) supera il limite (%2). Eliminazione dei %3 file più vecchi.</translation>
+            <translation>Pulizia necessaria: il numero attuale (%1) supera il limite (%2). Eliminazione di %3 file più vecchi.</translation>
         </message>
         <message>
             <location filename="../DesktopIconBackupManager.py" line="266"/>

@@ -37,9 +37,9 @@ try:
         with open(v_path, "r", encoding="utf-8") as f:
             VERSION = f.read().strip()
     else:
-        VERSION = "0.0.0.0"
+        VERSION = "0.0.0"
 except Exception as e:
-    VERSION = "0.0.0.0"
+    VERSION = "0.0.0"
 # ------------------------------------------
 
 # --- PYINSTALLER RESOURCE PATH FIX ---

@@ -15,7 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Legge la versione dal file version.txt
       - name: Get App Version
         id: app_version
         shell: pwsh
