@@ -1,7 +1,12 @@
 name: Manual LaTeX Compilation
 
 on:
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build_latex:
@@ -13,11 +18,19 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          # Ensure this matches your filename exactly
-          root_file: DesktopIconBackupManagerl.tex
+          root_file: DesktopIconBackupManager.tex
 
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+      - name: Rename PDF to manual.pdf
+        run: mv DesktopIconBackupManager.pdf manual.pdf
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: DesktopIconBackup-PDF
-          path: DesktopIconBackupManagerl.pdf
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
