@@ -1,0 +1,654 @@
+\documentclass[a4paper,11pt]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fontawesome5}
+\usepackage{amsmath}
+\usepackage{float}
+
+% Page setup
+\geometry{margin=2.5cm}
+\setlength{\headheight}{13.6pt}
+\addtolength{\topmargin}{-1.6pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{Desktop Icon Backup Manager}
+\fancyfoot[C]{\thepage}
+
+% Colors
+\definecolor{primary}{RGB}{0,120,215}
+\definecolor{success}{RGB}{0,166,90}
+\definecolor{warning}{RGB}{255,193,7}
+\definecolor{danger}{RGB}{204,0,0}
+\definecolor{codebg}{RGB}{245,245,245}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    filecolor=primary,
+    urlcolor=primary,
+    pdftitle={Desktop Icon Backup Manager - User Manual},
+    pdfauthor={mapi68},
+}
+
+% Custom boxes
+\newtcolorbox{infobox}[1][]{
+    colback=blue!5!white,
+    colframe=primary,
+    fonttitle=\bfseries,
+    title=#1,
+    left=5pt,
+    right=5pt,
+    top=5pt,
+    bottom=5pt
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=orange!5!white,
+    colframe=warning,
+    fonttitle=\bfseries,
+    title=#1,
+    left=5pt,
+    right=5pt,
+    top=5pt,
+    bottom=5pt
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=green!5!white,
+    colframe=success,
+    fonttitle=\bfseries,
+    title=#1,
+    left=5pt,
+    right=5pt,
+    top=5pt,
+    bottom=5pt
+}
+
+% Title formatting
+\titleformat{\section}
+{\color{primary}\normalfont\Large\bfseries}
+{\color{primary}\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\color{primary}\normalfont\large\bfseries}
+{\color{primary}\thesubsection}{1em}{}
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries Desktop Icon Backup Manager\par}
+    \vspace{0.5cm}
+    {\Large User Manual\par}
+    \vspace{2cm}
+
+    {\Large\itshape Software Version: \input{version.txt}\par}
+    \vspace{1cm}
+
+    {\large Developed by: \textbf{mapi68}\par}
+    \vspace{3cm}
+
+    \includegraphics[width=0.2\textwidth]{icon.png}
+    \vspace{2cm}
+
+    {\large \today\par}
+
+    \vfill
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Document content
+\section{Introduction}
+
+\textbf{Desktop Icon Backup Manager} is a professional tool designed to save and restore Windows desktop icon positions. The program offers advanced features for managing multiple layouts, adaptive scaling for different resolutions, and complete automation through configurable settings.
+
+\subsection{Key Features}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Quick Backup}: Save icon positions with optional descriptive tags
+    \item \textbf{Backup Management}: Dedicated interface to select, restore, or delete specific backups
+    \item \textbf{Adaptive Scaling}: Option to automatically scale icon positions across different resolutions
+    \item \textbf{Automatic Cleanup}: Configurable limit on the number of backups to retain
+    \item \textbf{Random Scramble}: Randomize icon positions with automatic preventive backup
+    \item \textbf{System Tray Integration}: Quick access to main functions from the system tray
+    \item \textbf{Automation}: Automatic save on exit and automatic restore on startup
+\end{itemize}
+
+\subsection{System Requirements}
+
+\begin{infobox}[Minimum Requirements]
+\begin{itemize}[leftmargin=*]
+    \item Operating System: Windows 7 or higher
+    \item Python 3.8+ (if running from source)
+    \item Libraries: PyQt6, pywin32
+    \item Disk Space: 50 MB for the application + space for backups
+\end{itemize}
+\end{infobox}
+
+\section{Installation and Startup}
+
+\subsection{Installation}
+
+\textbf{Method 1: Standalone Executable (Recommended)}
+\begin{enumerate}
+    \item Download the \texttt{DesktopIconBackupManager.exe} file
+    \item Place the executable in a dedicated folder
+    \item Run the program with a double-click
+\end{enumerate}
+
+\textbf{Method 2: From Python Source}
+\begin{enumerate}
+    \item Install Python 3.8 or higher
+    \item Install dependencies:
+    \begin{verbatim}
+    pip install PyQt6 pywin32
+    \end{verbatim}
+    \item Run the script:
+    \begin{verbatim}
+    python DesktopIconBackupManager.py
+    \end{verbatim}
+\end{enumerate}
+
+\subsection{First Run}
+
+On first run, the program:
+\begin{itemize}
+    \item Automatically creates the \texttt{icon\_backups} folder for backup files
+    \item Generates the \texttt{settings.ini} configuration file
+    \item Verifies the presence of desktop icons
+    \item Places itself in the system tray
+\end{itemize}
+
+\begin{warningbox}[Warning]
+Make sure desktop icons are visible. If icons are hidden, the program will not be able to access their positions.
+\end{warningbox}
+
+\section{Main Interface}
+
+\subsection{Interface Overview}
+
+The main interface is divided into four main areas:
+
+\begin{enumerate}
+    \item \textbf{Menu Bar}: Contains File, Settings, and Help
+    \item \textbf{Tag and Actions Area}: Field for descriptive tags and main action buttons
+    \item \textbf{Activity Log}: Displays operation status in real-time
+    \item \textbf{Status Bar}: Shows current resolution and status messages
+\end{enumerate}
+
+\subsection{Main Buttons}
+
+\subsubsection{\texorpdfstring{\faSave}{}\ SAVE QUICK BACKUP}
+\textcolor{success}{\textbf{Color: Green}}
+
+Immediately saves current desktop icon positions to a new backup file. You can add a descriptive tag in the field above the button.
+
+\textbf{Operation}:
+\begin{itemize}
+    \item Scans all icons present on the desktop
+    \item Records X and Y coordinates for each icon
+    \item Saves metadata (resolution, icon count, timestamp)
+    \item Applies automatic cleanup if configured
+\end{itemize}
+
+\subsubsection{\texorpdfstring{\faUndo}{}\ RESTORE LATEST}
+\textcolor{danger}{\textbf{Color: Red}}
+
+Restores icon positions from the last saved backup. Before restoring, a confirmation window is shown with backup details.
+
+\textbf{Information Displayed}:
+\begin{itemize}
+    \item Backup file name
+    \item Saved resolution
+    \item Number of icons
+    \item Tag/description
+    \item Backup date and time
+\end{itemize}
+
+\subsubsection{\texorpdfstring{\faList}{}\ BACKUP MANAGER}
+\textcolor{primary}{\textbf{Color: Blue}}
+
+Opens the backup management window that allows you to:
+\begin{itemize}
+    \item View all available backups
+    \item Select a specific backup to restore
+    \item Delete single or multiple backups
+    \item View extended details of each backup
+    \item View a visual layout preview of each backup
+\end{itemize}
+
+\section{File Menu}
+
+\subsection{Scramble Desktop Icons (Random)}
+
+This function completely randomizes the positions of all desktop icons.
+
+\begin{warningbox}[Important]
+Before scrambling, an automatic backup is \textbf{always} created with the tag "Auto-Backup before Scramble (Random)". This ensures the ability to restore the previous layout.
+\end{warningbox}
+
+\textbf{Procedure}:
+\begin{enumerate}
+    \item Select \texttt{File > Scramble Desktop Icons}
+    \item Confirm the operation in the dialog window
+    \item The program automatically creates a backup
+    \item Icons are repositioned randomly
+\end{enumerate}
+
+\subsection{Remove All Backups}
+
+Permanently deletes all saved backup files.
+
+\begin{warningbox}[Warning - Irreversible Operation]
+This action cannot be undone. All backups will be permanently deleted from the system.
+\end{warningbox}
+
+\subsection{Exit}
+
+Closes the application. If configured, it can:
+\begin{itemize}
+    \item Create an automatic backup before exiting
+    \item Minimize to system tray instead of closing
+    \item Save window geometry
+\end{itemize}
+
+\section{Settings Menu}
+
+\subsection{Start Minimized to Tray}
+
+When enabled, the application starts minimized to the system tray instead of showing the main window.
+
+\textbf{Use Case}: Useful for users who want to have the program always available in the background without occupying space in the taskbar.
+
+\subsection{Auto-Save on Exit}
+
+Automatically creates a backup of current positions when closing the program.
+
+\begin{successbox}[Recommended]
+This option is strongly recommended to avoid data loss in case of unsaved changes.
+\end{successbox}
+
+\textbf{Technical Details}:
+\begin{itemize}
+    \item The backup is created with the tag "Auto-Save on Exit"
+    \item Respects the configured automatic cleanup limit
+    \item Does not require user confirmation
+\end{itemize}
+
+\subsection{Auto-Restore on Startup}
+
+Automatically restores the last saved backup when starting the program.
+
+\textbf{Behavior}:
+\begin{itemize}
+    \item Restore occurs 1 second after startup
+    \item Uses configured scaling settings
+    \item Shows operation log in the main window
+\end{itemize}
+
+\begin{warningbox}[Note]
+When combined with "Auto-Save on Exit", this option creates an automatic save/restore cycle of icon positions.
+\end{warningbox}
+
+\subsection{Enable Adaptive Scaling on Restore}
+
+Enables adaptive scaling of icon positions when restoring a backup created with a different resolution.
+
+\subsubsection{How Scaling Works}
+
+The system calculates scaling factors based on resolution:
+
+$$\text{scale}_x = \frac{\text{current width}}{\text{saved width}}$$
+
+$$\text{scale}_y = \frac{\text{current height}}{\text{saved height}}$$
+
+Each coordinate is then transformed:
+
+$$x_{\text{new}} = x_{\text{saved}} \times \text{scale}_x$$
+$$y_{\text{new}} = y_{\text{saved}} \times \text{scale}_y$$
+
+\textbf{Practical Example}:
+\begin{itemize}
+    \item Backup saved at 1920×1080
+    \item Restore on 2560×1440 monitor
+    \item Scaling factors: $\text{scale}_x = 1.333$, $\text{scale}_y = 1.333$
+    \item Icon saved at (100, 100) → restored at (133, 133)
+\end{itemize}
+
+\subsection{Minimize to Tray on Close}
+
+When enabled, pressing the "X" button minimizes the program to the system tray instead of closing it completely.
+
+\textbf{To close completely}:
+\begin{itemize}
+    \item Use \texttt{File > Exit}
+    \item Right-click on the tray icon and select "Exit"
+    \item Press \texttt{Ctrl+Q}
+\end{itemize}
+
+\subsection{Automatic Backup Cleanup Limit}
+
+Configures the maximum number of backups to maintain. When the limit is exceeded, the oldest backups are automatically deleted.
+
+\textbf{Available Options}:
+\begin{itemize}
+    \item \textbf{Disabled (Keep All)}: No limit (value: 0)
+    \item \textbf{Keep Last 5}: Keeps only the last 5 backups
+    \item \textbf{Keep Last 10}: Keeps only the last 10 backups
+    \item \textbf{Keep Last 25}: Keeps only the last 25 backups
+    \item \textbf{Keep Last 50}: Keeps only the last 50 backups
+\end{itemize}
+
+\begin{infobox}[Recommended Strategy]
+For daily use, \textbf{Keep Last 10} offers a good balance between security and disk space usage. For power users who frequently change configuration, \textbf{Keep Last 25} or more is recommended.
+\end{infobox}
+
+\section{Advanced Backup Management}
+
+\subsection{Backup Manager Window}
+
+The Backup Manager window offers a complete view of all saved backups.
+
+\subsubsection{Information Columns}
+
+\begin{enumerate}
+    \item \textbf{TAG/DESCRIPTION}: Description or tag assigned to the backup
+    \item \textbf{RESOLUTION}: Monitor resolution at the time of saving
+    \item \textbf{ICONS}: Number of saved icons
+    \item \textbf{TIMESTAMP}: Backup date and time in readable format
+\end{enumerate}
+
+\subsubsection{Available Operations}
+
+\textbf{Restore}:
+\begin{itemize}
+    \item Double-click on a backup
+    \item Selection + click on "Restore Selected Layout"
+    \item Right-click > "Restore Selected"
+\end{itemize}
+
+\textbf{Delete}:
+\begin{itemize}
+    \item Right-click on a backup > "Delete Selected"
+    \item Confirmation required before deletion
+\end{itemize}
+
+\subsection{Backup File Format}
+
+Backups are saved as JSON files in the \texttt{icon\_backups} folder.
+
+\textbf{Naming Convention}:
+\begin{verbatim}
+[Resolution]_[Date]_[Time].json
+
+Example: 1920x1080_20241211_143000.json
+\end{verbatim}
+
+\textbf{JSON File Structure}:
+\begin{verbatim}
+{
+    "timestamp": "2024-12-11T14:30:00.123456",
+    "icon_count": 15,
+    "description": "Backup Before Meeting",
+    "display_metadata": {
+        "monitor_count": 1,
+        "primary_resolution": "1920x1080",
+        "screens": [...]
+    },
+    "icons": {
+        "Computer": [100, 200],
+        "Documents": [100, 350],
+        ...
+    }
+}
+\end{verbatim}
+
+\section{System Tray Integration}
+
+\subsection{System Tray Context Menu}
+
+Right-click on the system tray icon to access:
+
+\begin{itemize}
+    \item \textbf{Quick Save}: Saves a quick backup with default tag "Quick Save (Tray)"
+    \item \textbf{Restore Latest}: Restores the last saved backup
+    \item \textbf{Show Window}: Shows the main window
+    \item \textbf{Exit}: Completely closes the application
+\end{itemize}
+
+\subsection{Notifications}
+
+The program shows notifications from the system tray for:
+\begin{itemize}
+    \item Operation completion when the window is hidden
+    \item Critical errors
+    \item Minimized startup
+    \item Minimization from window closure
+\end{itemize}
+
+\section{Keyboard Shortcuts}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Shortcut} & \textbf{Action} \\
+\hline
+\texttt{Ctrl+S} & Quick save \\
+\texttt{Ctrl+Q} & Exit application \\
+\hline
+\end{tabular}
+\caption{Available keyboard shortcuts}
+\end{table}
+
+\section{Troubleshooting}
+
+\subsection{Common Issues}
+
+\subsubsection{Error: "Unable to find desktop ListView control"}
+
+\textbf{Cause}: Desktop icons are hidden or the ListView control is not accessible.
+
+\textbf{Solution}:
+\begin{enumerate}
+    \item Right-click on the desktop
+    \item Select \texttt{View > Show desktop icons}
+    \item Restart the program
+\end{enumerate}
+
+\subsubsection{Icons Restored to Wrong Positions}
+
+\textbf{Cause}: Resolution change or different monitor configuration.
+
+\textbf{Solutions}:
+\begin{enumerate}
+    \item Enable "Enable Adaptive Scaling on Restore" in settings
+    \item Create separate backups for each monitor configuration
+    \item Verify that current resolution matches the backup
+\end{enumerate}
+
+\subsubsection{Backup Not Found}
+
+\textbf{Cause}: Corrupted or deleted backup file, missing \texttt{icon\_backups} folder.
+
+\textbf{Solution}:
+\begin{enumerate}
+    \item Verify existence of \texttt{icon\_backups} folder
+    \item Check read/write permissions
+    \item Verify JSON file integrity
+\end{enumerate}
+
+\subsection{Logging and Diagnostics}
+
+The "Activity Log" area records all operations and errors. For advanced diagnostics:
+
+\begin{enumerate}
+    \item Execute the problematic operation
+    \item Copy the log content
+    \item Check specific error messages
+    \item Verify \texttt{settings.ini} file for incorrect configurations
+\end{enumerate}
+
+\section{Best Practices}
+
+\subsection{Optimal Backup Strategy}
+
+\begin{successbox}[Recommended Configuration]
+\begin{itemize}
+    \item Enable "Auto-Save on Exit"
+    \item Set automatic cleanup limit to 10-25 backups
+    \item Create manual backups before important changes
+    \item Use descriptive tags for important backups
+\end{itemize}
+\end{successbox}
+
+\subsection{Multi-Monitor Management}
+
+For multi-monitor configurations:
+
+\begin{enumerate}
+    \item Create separate backups for each configuration
+    \item Use descriptive tags: "2 Monitors", "Single Monitor", etc.
+    \item Do not enable auto-restore if frequently changing configuration
+    \item Always verify monitor configuration before restoring
+\end{enumerate}
+
+\subsection{Regular Maintenance}
+
+\begin{itemize}
+    \item Periodically review saved backups
+    \item Manually delete obsolete backups if necessary
+    \item Check \texttt{icon\_backups} folder for space usage
+    \item Export important backups to safe locations
+\end{itemize}
+
+\section{Frequently Asked Questions (FAQ)}
+
+\subsection{Does the program work with Windows 11?}
+Yes, the program is fully compatible with Windows 11 and all previous versions starting from Windows 7.
+
+\subsection{Can I use the program with virtual desktops?}
+The program manages icons on the main desktop. Icons on Windows 10/11 virtual desktops are managed by the same system, so the backup includes all visible icons.
+
+\subsection{Are backups portable between different computers?}
+Yes, JSON files can be copied between computers. However, positions may not be accurate if resolutions differ. Use adaptive scaling for best results.
+
+\subsection{How much space do backups occupy?}
+Each backup typically occupies 2-10 KB depending on the number of icons. With 50 backups, total usage is generally less than 500 KB.
+
+\subsection{Can I manually edit backup files?}
+Yes, they are standard JSON files. You can edit them with a text editor, but be careful with JSON syntax to avoid file corruption.
+
+\section{Technical Information}
+
+\subsection{Software Architecture}
+
+The program uses:
+\begin{itemize}
+    \item \textbf{PyQt6}: Modern GUI framework
+    \item \textbf{win32api}: Low-level access to Windows functions
+    \item \textbf{Threading}: Asynchronous operations to avoid UI blocking
+    \item \textbf{QSettings}: Configuration persistence in INI format
+\end{itemize}
+
+\subsection{Remote Memory Access}
+
+To read icon positions, the program:
+\begin{enumerate}
+    \item Locates the Explorer process managing the desktop
+    \item Allocates memory in the remote process
+    \item Uses Windows messages to query the ListView control
+    \item Reads coordinates and icon names
+    \item Frees allocated memory
+\end{enumerate}
+
+\subsection{Security and Privacy}
+
+\begin{itemize}
+    \item No data is sent online
+    \item All backups are local
+    \item No telemetry collection
+    \item Access only to desktop information
+\end{itemize}
+
+\section{License and Credits}
+
+\subsection{Developer}
+\textbf{mapi68}
+
+\subsection{Libraries Used}
+\begin{itemize}
+    \item PyQt6 - The Qt Company (GPL/Commercial License)
+    \item pywin32 - Python for Windows Extensions (PSF License)
+\end{itemize}
+
+\section{Support and Contacts}
+
+To report bugs, request features, or get support:
+
+\begin{itemize}
+    \item Use the "Issues" section of the repository
+    \item Always include the complete error log
+    \item Specify program version and Windows version
+\end{itemize}
+
+\newpage
+
+\section{Screenshots}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DIBM_1.png}
+    \caption{Main interface showing the activity log and three main action buttons}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DIBM_2.png}
+    \caption{Backup Manager window with list of saved backups and layout preview}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DIBM_3.png}
+    \caption{Confirmation dialog before restoring a backup}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DIBM_4.png}
+    \caption{Desktop Icon Backup Manager featuring dark mode and Italian support}
+\end{figure}
+
+\vfill
+
+\begin{center}
+\rule{0.5\textwidth}{0.4pt}
+
+\textit{End of User Manual}
+
+\textbf{Desktop Icon Backup Manager}
+
+Manual Version: 1.0 - \today
+\end{center}
+
+\end{document}
