@@ -246,10 +246,10 @@ class DesktopIconManager:
 
         if deleted_count > 0:
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Successfully deleted %1 backup files.").replace("%1", str(deleted_count)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Successfully deleted %n backup file(s).", None, deleted_count))
         if failed_count > 0:
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Failed to delete %1 backup files.").replace("%1", str(failed_count)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Failed to delete %n backup file(s).", None, failed_count))
             return False
         return True
 
@@ -264,14 +264,14 @@ class DesktopIconManager:
 
         if current_count <= max_count:
             #
-            log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup skipped: Current count (%1) is within the limit (%2).").replace("%1", str(current_count)).replace("%2", str(max_count)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup skipped: Current count (%n) is within the limit (%1).", None, current_count).replace("%1", str(max_count)))
             return
 
         files_to_delete = backup_files[max_count:]
         deleted_count = 0
 
         #
-        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %3 oldest files.").replace("%1", str(current_count)).replace("%2", str(max_count)).replace("%3", str(len(files_to_delete))))
+        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %n oldest file(s).", None, len(files_to_delete)).replace("%1", str(current_count)).replace("%2", str(max_count)))
 
         for filename in files_to_delete:
             if self.delete_backup(filename):
@@ -283,7 +283,7 @@ class DesktopIconManager:
                 log_callback(QCoreApplication.translate("DesktopIconManager", "  Failed to delete: %1").replace("%1", str(filename)))
 
         #
-        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup complete. Total deleted: %1.").replace("%1", str(deleted_count)))
+        log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup complete. Total deleted: %n file(s).", None, deleted_count))
 
     def _get_latest_backup_path(self) -> Optional[str]:
         latest_file = self.get_latest_backup_filename()
@@ -1124,7 +1124,7 @@ class MainWindow(QMainWindow):
         self.settings.setValue("cleanup_limit", limit)
         self._update_cleanup_menu_check(limit)
         #
-        self.log(self.tr("Automatic cleanup limit set to: %1 backups (0 = Disabled).").replace("%1", str(limit)))
+        self.log(self.tr("Automatic cleanup limit set to: %n backup(s) (0 = Disabled).", None, limit))
 
     def _update_cleanup_menu_check(self, current_limit: int):
         for limit, action in self.cleanup_actions.items():
@@ -1207,7 +1207,7 @@ class MainWindow(QMainWindow):
         #
         reply = QMessageBox.warning(
             self, self.tr("WARNING: Delete All Backups"),
-            self.tr("Are you absolutely sure you want to permanently delete ALL %1 desktop icon backup files?\n\nThis action cannot be undone!").replace("%1", str(backup_count)),
+            self.tr("Are you absolutely sure you want to permanently delete ALL %n desktop icon backup file(s)?\n\nThis action cannot be undone!", None, backup_count),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )
@@ -1370,7 +1370,7 @@ class MainWindow(QMainWindow):
 
         if saved_count != current_count:
             #
-            self.log(self.tr("⚠ Warning: Saved (%1 monitors) vs Current (%2 monitors).").replace("%1", str(saved_count)).replace("%2", str(current_count)))
+            self.log(self.tr("⚠ Warning: Saved (%n monitor(s)) vs Current (%1 monitor(s)).", None, saved_count).replace("%1", str(current_count)))
             QMessageBox.warning(
                 self, self.tr("Monitor Mismatch Warning"),
                 self.tr("The layout was saved with %1 monitor(s), but you currently have %2 monitor(s) connected.\n\nIcon positions have been restored, but they may be inaccurate.")
@@ -1472,3 +1472,6 @@ if __name__ == "__main__":
         #
         QMessageBox.critical(None, QCoreApplication.translate("Main", "Critical Error"), QCoreApplication.translate("Main", "Failed to start application:\n%1").replace("%1", str(e)))
         sys.exit(1)
+
+
+
