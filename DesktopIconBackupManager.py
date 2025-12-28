@@ -19,9 +19,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QSystemTrayIcon)
 from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
                           QSize, QStandardPaths, QCoreApplication, QRect, QPoint,
-                          QTranslator, QLocale) #
+                          QTranslator, QLocale, QUrl) # Added QUrl
 from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
-                         QColor, QPen)
+                         QColor, QPen, QDesktopServices)
 
 def resource_path(relative_path: str) -> str:
     try:
@@ -997,9 +997,16 @@ class MainWindow(QMainWindow):
             self.cleanup_actions[limit] = action
 
         # Help Menu
-        #
         help_menu = menu_bar.addMenu(self.tr("&Help"))
-        #
+
+        # Online User Manual
+        action_manual = QAction(self.tr("Online User Manual"), self)
+        action_manual.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://mapi68.github.io/DesktopIconBackupManager/manual.pdf")))
+        help_menu.addAction(action_manual)
+
+        help_menu.addSeparator()
+
+        # About
         action_about = QAction(self.tr("&About"), self)
         action_about.triggered.connect(self.show_about_dialog)
         help_menu.addAction(action_about)
