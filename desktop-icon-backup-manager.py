@@ -114,7 +114,7 @@ def parse_backup_filename(filename: str) -> Tuple[str, str, str]:
                 return filename.replace('.json', ''), "N/A", filename.replace('.json', '')
 
         dt_object = datetime.strptime(timestamp_part, "%Y%m%d_%H%M%S")
-        readable_date = dt_object.strftime("%Y/%m/%d at %H:%M:%S")
+        readable_date = dt_object.strftime("%Y/%m/%d %H:%M:%S")
         return readable_date, resolution, timestamp_part
 
     except Exception:
