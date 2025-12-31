@@ -15,6 +15,8 @@
 \usepackage{fontawesome5}
 \usepackage{amsmath}
 \usepackage{float}
+\usepackage{parskip}
+\usepackage{needspace}
 
 % Page setup
 \geometry{margin=2.5cm}
@@ -119,28 +121,31 @@
 % Document content
 \section{Introduction}
 
-\textbf{Desktop Icon Backup Manager} is a professional tool designed to save and restore Windows desktop icon positions. The program offers advanced features for managing multiple layouts, adaptive scaling for different resolutions, and complete automation through configurable settings.
+\textbf{Desktop Icon Backup Manager} is a professional tool designed to save and restore Windows desktop icon positions with advanced features for managing multiple layouts, adaptive scaling across different resolutions, and complete automation through configurable settings.
 
 \subsection{Key Features}
 
 \begin{itemize}[leftmargin=*]
     \item \textbf{Quick Backup}: Save icon positions with optional descriptive tags
-    \item \textbf{Backup Management}: Dedicated interface to select, restore, or delete specific backups
-    \item \textbf{Adaptive Scaling}: Option to automatically scale icon positions across different resolutions
-    \item \textbf{Automatic Cleanup}: Configurable limit on the number of backups to retain
+    \item \textbf{Backup Management}: Dedicated interface with search filtering to select, restore, or delete specific backups
+    \item \textbf{Visual Preview}: Mini-map display of icon layouts before restoring
+    \item \textbf{Adaptive Scaling}: Automatic adjustment of icon positions across different resolutions
+    \item \textbf{Automatic Cleanup}: Configurable limit on the number of backups to retain (5, 10, 25, 50, or unlimited)
     \item \textbf{Random Scramble}: Randomize icon positions with automatic preventive backup
     \item \textbf{System Tray Integration}: Quick access to main functions from the system tray
-    \item \textbf{Automation}: Automatic save on exit and automatic restore on startup
+    \item \textbf{Automation}: Auto-save on exit and auto-restore on startup options
+    \item \textbf{Multi-language Support}: Internationalization ready with translation system
 \end{itemize}
 
 \subsection{System Requirements}
 
 \begin{infobox}[Minimum Requirements]
 \begin{itemize}[leftmargin=*]
-    \item Operating System: Windows 7 or higher
+    \item Operating System: Windows 7 or higher (fully compatible with Windows 11)
     \item Python 3.8+ (if running from source)
     \item Libraries: PyQt6, pywin32
-    \item Disk Space: 50 MB for the application + space for backups
+    \item Disk Space: 50 MB for application + space for backups (typically 2-10 KB per backup)
+    \item Permissions: Standard user permissions (no administrator rights required)
 \end{itemize}
 \end{infobox}
 
@@ -153,6 +158,7 @@
     \item Download the \texttt{desktop-icon-backup-manager.exe} file
     \item Place the executable in a dedicated folder
     \item Run the program with a double-click
+    \item The program will automatically create necessary folders and configuration files
 \end{enumerate}
 
 \textbf{Method 2: From Python Source}
@@ -170,255 +176,562 @@
 
 \subsection{First Run}
 
-On first run, the program:
+On first run, the program automatically:
 \begin{itemize}
-    \item Automatically creates the \texttt{icon\_backups} folder for backup files
-    \item Generates the \texttt{settings.ini} configuration file
-    \item Verifies the presence of desktop icons
-    \item Places itself in the system tray
+    \item Creates the \texttt{icon\_backups} folder for backup files
+    \item Generates the \texttt{settings.ini} configuration file in the application directory
+    \item Verifies the presence and accessibility of desktop icons
+    \item Places itself in the system tray (if enabled)
+    \item Loads default settings and preferences
 \end{itemize}
 
-\begin{warningbox}[Warning]
-Make sure desktop icons are visible. If icons are hidden, the program will not be able to access their positions.
+\begin{warningbox}[Important - Desktop Icons Must Be Visible]
+Make sure desktop icons are visible (Right-click desktop $\rightarrow$ View $\rightarrow$ Show desktop icons). If icons are hidden, the program cannot access their positions and will show an error: "Unable to find desktop ListView control."
 \end{warningbox}
 
 \section{Main Interface}
 
 \subsection{Interface Overview}
 
-The main interface is divided into four main areas:
+The main interface is divided into five main areas:
 
 \begin{enumerate}
-    \item \textbf{Menu Bar}: Contains File, Settings, and Help
-    \item \textbf{Tag and Actions Area}: Field for descriptive tags and main action buttons
-    \item \textbf{Activity Log}: Displays operation status in real-time
-    \item \textbf{Status Bar}: Shows current resolution and status messages
+    \item \textbf{Menu Bar}: Contains File, Settings, and Help menus with all advanced options
+    \item \textbf{Progress Bar}: Shows real-time progress during backup, restore, and scramble operations
+    \item \textbf{Tag Input Field}: Optional field for entering descriptive tags for quick saves
+    \item \textbf{Action Buttons}: Three large, color-coded buttons for primary operations
+    \item \textbf{Activity Log}: Displays operation status, warnings, and errors in real-time with timestamps
+    \item \textbf{Status Bar}: Shows current primary monitor resolution and quick operation messages
 \end{enumerate}
 
-\subsection{Main Buttons}
+\subsection{Main Action Buttons}
 
 \subsubsection{\texorpdfstring{\faSave}{}\ SAVE QUICK BACKUP}
-\textcolor{success}{\textbf{Color: Green}}
+\textcolor{success}{\textbf{Color: Green | Shortcut: Ctrl+S}}
 
-Immediately saves current desktop icon positions to a new backup file. You can add a descriptive tag in the field above the button.
+Immediately saves current desktop icon positions to a new timestamped backup file. You can add an optional descriptive tag in the field above the button for easier identification later.
 
-\textbf{Operation}:
-\begin{itemize}
-    \item Scans all icons present on the desktop
-    \item Records X and Y coordinates for each icon
-    \item Saves metadata (resolution, icon count, timestamp)
-    \item Applies automatic cleanup if configured
-\end{itemize}
+\textbf{Operation Sequence}:
+\begin{enumerate}
+    \item Disables UI buttons to prevent concurrent operations
+    \item Displays progress bar
+    \item Scans all icons present on the desktop via Windows ListView control
+    \item Records exact X and Y pixel coordinates for each icon
+    \item Saves metadata including resolution, icon count, timestamp, and description
+    \item Applies automatic cleanup if limit is configured (deletes oldest backups)
+    \item Forces desktop refresh to ensure visual consistency
+    \item Re-enables UI and displays completion message
+\end{enumerate}
+
+\textbf{Example Log Output}:
+\begin{verbatim}
+[14:30:15] Starting new timestamped backup...
+[14:30:15]   (Tag: Work Setup Final)
+[14:30:15] Monitor Resolution: 1920x1080
+[14:30:15] Found 12 icons. Starting scan...
+[14:30:16]   Saved 12 icons to backup file '1920x1080_20241211_143015.json'
+[14:30:16]   (Description: Work Setup Final)
+\end{verbatim}
 
 \subsubsection{\texorpdfstring{\faUndo}{}\ RESTORE LATEST}
 \textcolor{danger}{\textbf{Color: Red}}
 
-Restores icon positions from the last saved backup. Before restoring, a confirmation window is shown with backup details.
+Restores icon positions from the most recent backup file. Before restoring, a detailed confirmation dialog displays complete backup information.
 
-\textbf{Information Displayed}:
+\textbf{Confirmation Dialog Information}:
 \begin{itemize}
-    \item Backup file name
-    \item Saved resolution
-    \item Number of icons
-    \item Tag/description
-    \item Backup date and time
+    \item Full backup file name
+    \item Saved resolution with comparison to current resolution
+    \item Total number of icons in the backup
+    \item Tag/description (if available)
+    \item Backup date and time in human-readable format (YYYY/MM/DD HH:MM:SS)
 \end{itemize}
+
+\textbf{Restore Process}:
+\begin{enumerate}
+    \item Validates backup file existence and format
+    \item Disables window redrawing for performance
+    \item Reads saved icon positions from JSON file
+    \item Applies adaptive scaling if enabled and resolutions differ
+    \item Maps saved icon names to current desktop icons
+    \item Updates each icon position using Windows API
+    \item Re-enables redrawing and forces desktop refresh
+    \item Reports statistics (icons restored, icons skipped)
+\end{enumerate}
+
+\begin{infobox}[Smart Restore Behavior]
+If an icon exists in the backup but not on the current desktop, it will be skipped and reported. This prevents errors when restoring backups from different system states.
+\end{infobox}
 
 \subsubsection{\texorpdfstring{\faList}{}\ BACKUP MANAGER}
 \textcolor{primary}{\textbf{Color: Blue}}
 
-Opens the backup management window that allows you to:
+Opens the comprehensive backup management window that provides:
 \begin{itemize}
-    \item View all available backups
-    \item Select a specific backup to restore
-    \item Delete single or multiple backups
-    \item View extended details of each backup
-    \item View a visual layout preview of each backup
+    \item \textbf{Search/Filter Bar}: Real-time filtering by tag, resolution, or date
+    \item \textbf{Backup List}: Tabular view with aligned columns for easy scanning
+    \item \textbf{Visual Preview}: Mini-map showing icon positions from selected backup
+    \item \textbf{Detailed Information}: Extended metadata display for selected backup
+    \item \textbf{Context Menu}: Right-click for quick restore or delete actions
+    \item \textbf{Batch Operations}: Select and delete multiple backups
 \end{itemize}
 
 \section{File Menu}
 
 \subsection{Scramble Desktop Icons (Random)}
 
-This function completely randomizes the positions of all desktop icons.
+This function completely randomizes the positions of all desktop icons across the available screen area, creating a chaotic but fun layout.
 
-\begin{warningbox}[Important]
-Before scrambling, an automatic backup is \textbf{always} created with the tag "Auto-Backup before Scramble (Random)". This ensures the ability to restore the previous layout.
+\begin{warningbox}[Mandatory Pre-Scramble Backup]
+Before scrambling, an automatic backup is \textbf{always} created with the tag "Auto-Backup before Scramble (Random)". This ensures you can always restore the previous layout. The scramble operation will abort if this backup fails.
 \end{warningbox}
 
-\textbf{Procedure}:
+\textbf{Detailed Procedure}:
 \begin{enumerate}
-    \item Select \texttt{File > Scramble Desktop Icons}
-    \item Confirm the operation in the dialog window
-    \item The program automatically creates a backup
-    \item Icons are repositioned randomly
+    \item Select \texttt{File > Scramble Desktop Icons (Random)}
+    \item Confirm the operation in the warning dialog
+    \item Program creates mandatory backup (first 50\% of progress)
+    \item Desktop redrawing is temporarily disabled for performance
+    \item Each icon is assigned random X and Y coordinates within screen bounds
+    \item Positions use margin buffer (100 pixels) to prevent edge clipping
+    \item Desktop redrawing is re-enabled (remaining 50\% of progress)
+    \item System refresh signals are broadcast
 \end{enumerate}
+
+\textbf{Technical Details}:
+\begin{itemize}
+    \item Uses \texttt{GetSystemMetrics} to determine virtual screen dimensions
+    \item Random positions: \texttt{random.randint(margin, screen\_dimension - margin)}
+    \item Margin prevents icons from being placed too close to screen edges
+    \item Operation completes even if some icons fail to move
+\end{itemize}
 
 \subsection{Remove All Backups}
 
-Permanently deletes all saved backup files.
+Permanently deletes all saved backup files from the \texttt{icon\_backups} folder.
 
 \begin{warningbox}[Warning - Irreversible Operation]
-This action cannot be undone. All backups will be permanently deleted from the system.
+This action cannot be undone. All backups will be permanently deleted from the system. You will be prompted with the exact number of files to be deleted before confirmation.
 \end{warningbox}
+
+\textbf{Deletion Process}:
+\begin{enumerate}
+    \item Counts all JSON backup files
+    \item Shows confirmation dialog with file count
+    \item Iterates through each backup file
+    \item Attempts deletion and logs success/failure for each
+    \item Reports final statistics (deleted count, failed count)
+    \item Shows summary dialog
+\end{enumerate}
 
 \subsection{Exit}
 
-Closes the application. If configured, it can:
+Closes the application gracefully with multiple configurable behaviors:
+
+\textbf{Exit Behaviors}:
 \begin{itemize}
-    \item Create an automatic backup before exiting
-    \item Minimize to system tray instead of closing
-    \item Save window geometry
+    \item Saves current window geometry (position and size) to settings
+    \item Creates automatic backup if "Auto-Save on Exit" is enabled
+    \item Respects "Minimize to Tray on Close" setting if window is closed via X button
+    \item Saves all pending settings changes
+    \item Properly closes system tray icon
+    \item Terminates console window if running as PyInstaller executable
+\end{itemize}
+
+\textbf{Exit Methods}:
+\begin{itemize}
+    \item Menu: \texttt{File > Exit}
+    \item Keyboard: \texttt{Ctrl+Q}
+    \item System Tray: Right-click icon $\rightarrow$ Exit
+    \item Window Close (X button): Behavior depends on "Minimize to Tray" setting
 \end{itemize}
 
 \section{Settings Menu}
 
 \subsection{Start Minimized to Tray}
 
-When enabled, the application starts minimized to the system tray instead of showing the main window.
+When enabled, the application starts hidden in the system tray instead of showing the main window.
 
-\textbf{Use Case}: Useful for users who want to have the program always available in the background without occupying space in the taskbar.
+\textbf{Use Cases}:
+\begin{itemize}
+    \item Users who want the program always available in background
+    \item Systems with auto-restore enabled (no need to see the window)
+    \item Reducing desktop clutter while maintaining quick access
+\end{itemize}
+
+\textbf{Behavior}:
+\begin{itemize}
+    \item System tray notification: "Application started minimized to system tray"
+    \item Notification duration: 2 seconds
+    \item Double-click tray icon or use context menu to show window
+\end{itemize}
 
 \subsection{Auto-Save on Exit}
 
-Automatically creates a backup of current positions when closing the program.
+Automatically creates a backup of current icon positions when closing the program normally (not via Task Manager or system crash).
 
-\begin{successbox}[Recommended]
-This option is strongly recommended to avoid data loss in case of unsaved changes.
+\begin{successbox}[Strongly Recommended]
+This option is highly recommended to avoid data loss from unsaved layout changes. It provides a safety net for forgetful users and ensures your latest layout is always preserved.
 \end{successbox}
 
-\textbf{Technical Details}:
+\textbf{Technical Implementation}:
 \begin{itemize}
-    \item The backup is created with the tag "Auto-Save on Exit"
-    \item Respects the configured automatic cleanup limit
+    \item Backup is created in \texttt{closeEvent} before application exit
+    \item Tag: "Auto-Save on Exit"
+    \item Respects configured automatic cleanup limit
     \item Does not require user confirmation
+    \item Logs operation silently (visible only if window is open)
+    \item If backup fails, application still exits
+\end{itemize}
+
+\textbf{Interaction with Other Settings}:
+\begin{itemize}
+    \item Works independently of "Minimize to Tray on Close"
+    \item Complements "Auto-Restore on Startup" for seamless layout preservation
+    \item Cleanup limit prevents unlimited backup accumulation
 \end{itemize}
 
 \subsection{Auto-Restore on Startup}
 
-Automatically restores the last saved backup when starting the program.
+Automatically restores the most recent backup when the application starts.
 
-\textbf{Behavior}:
+\textbf{Detailed Behavior}:
 \begin{itemize}
-    \item Restore occurs 1 second after startup
-    \item Uses configured scaling settings
-    \item Shows operation log in the main window
+    \item Restore occurs 1 second after startup (QTimer delay)
+    \item Uses latest backup file by timestamp
+    \item Applies configured adaptive scaling settings
+    \item Shows full operation log in main window
+    \item No user confirmation required
+    \item If restore fails, application continues normally
 \end{itemize}
 
-\begin{warningbox}[Note]
-When combined with "Auto-Save on Exit", this option creates an automatic save/restore cycle of icon positions.
+\begin{warningbox}[Important Consideration]
+When combined with "Auto-Save on Exit", this creates an automatic save/restore cycle. While convenient, be cautious: if icons are in wrong positions when exiting, they will be automatically restored to those wrong positions on next startup. Use Backup Manager to restore specific known-good layouts if needed.
 \end{warningbox}
+
+\textbf{Recommended Use Cases}:
+\begin{itemize}
+    \item Single-monitor setups with stable icon arrangements
+    \item Users who frequently restart their computer
+    \item Systems where Windows randomly moves icons (common issue)
+    \item Combination with laptop docking/undocking workflows
+\end{itemize}
 
 \subsection{Enable Adaptive Scaling on Restore}
 
-Enables adaptive scaling of icon positions when restoring a backup created with a different resolution.
+Enables intelligent scaling of icon positions when restoring a backup created at a different screen resolution.
 
-\subsubsection{How Scaling Works}
+\subsubsection{How Adaptive Scaling Works}
 
-The system calculates scaling factors based on resolution:
+The system calculates independent scaling factors for X and Y axes based on resolution differences:
 
 $$\text{scale}_x = \frac{\text{current width}}{\text{saved width}}$$
 
 $$\text{scale}_y = \frac{\text{current height}}{\text{saved height}}$$
 
-Each coordinate is then transformed:
+Each saved coordinate is then transformed using these factors:
 
-$$x_{\text{new}} = x_{\text{saved}} \times \text{scale}_x$$
-$$y_{\text{new}} = y_{\text{saved}} \times \text{scale}_y$$
+$$x_{\text{new}} = \lfloor x_{\text{saved}} \times \text{scale}_x \rfloor$$
+$$y_{\text{new}} = \lfloor y_{\text{saved}} \times \text{scale}_y \rfloor$$
 
-\textbf{Practical Example}:
+\textbf{Practical Example - Upscaling}:
 \begin{itemize}
-    \item Backup saved at 1920×1080
-    \item Restore on 2560×1440 monitor
+    \item Backup saved at 1920×1080 (Full HD)
+    \item Restore on 2560×1440 (2K/QHD) monitor
     \item Scaling factors: $\text{scale}_x = 1.333$, $\text{scale}_y = 1.333$
-    \item Icon saved at (100, 100) → restored at (133, 133)
+    \item Icon at (960, 540) → restored at (1280, 720) [screen center maintained]
+    \item Icon at (100, 100) → restored at (133, 133) [relative position preserved]
 \end{itemize}
+
+\textbf{Practical Example - Downscaling}:
+\begin{itemize}
+    \item Backup saved at 2560×1440
+    \item Restore on 1920×1080 monitor
+    \item Scaling factors: $\text{scale}_x = 0.75$, $\text{scale}_y = 0.75$
+    \item Icon at (2000, 1200) → restored at (1500, 900)
+    \item Icon at (200, 200) → restored at (150, 150)
+\end{itemize}
+
+\subsubsection{When Scaling Is Applied}
+
+\begin{infobox}[Scaling Activation Conditions]
+Adaptive scaling only activates when ALL these conditions are met:
+\begin{enumerate}
+    \item "Enable Adaptive Scaling on Restore" is checked in Settings
+    \item Backup file contains resolution information (newer format)
+    \item Current resolution differs from saved resolution
+    \item Both resolutions can be successfully parsed
+\end{enumerate}
+If any condition fails, raw coordinates are used without modification.
+\end{infobox}
+
+\subsubsection{Log Messages for Scaling}
+
+\textbf{When Scaling Is Active}:
+\begin{verbatim}
+[14:45:20] Adaptive Scaling enabled: Saved 1920x1080 -> Current 2560x1440
+[14:45:20]   **[SCALING APPLIED]** Scaling factors: X=1.333, Y=1.333
+\end{verbatim}
+
+\textbf{When Scaling Is Skipped}:
+\begin{verbatim}
+[14:45:20] Adaptive Scaling enabled, but resolutions match or are invalid.
+           Scaling skipped.
+\end{verbatim}
+
+\textbf{When Scaling Is Disabled}:
+\begin{verbatim}
+[14:45:20] Adaptive Scaling is disabled. Restoring raw coordinates.
+\end{verbatim}
 
 \subsection{Minimize to Tray on Close}
 
-When enabled, pressing the "X" button minimizes the program to the system tray instead of closing it completely.
+When enabled, clicking the window's X button minimizes the program to the system tray instead of completely closing it.
 
-\textbf{To close completely}:
+\textbf{Complete Closure Methods}:
 \begin{itemize}
-    \item Use \texttt{File > Exit}
-    \item Right-click on the tray icon and select "Exit"
-    \item Press \texttt{Ctrl+Q}
+    \item Use menu: \texttt{File > Exit}
+    \item Keyboard shortcut: \texttt{Ctrl+Q}
+    \item Right-click tray icon: Select "Exit"
 \end{itemize}
+
+\textbf{User Notification}:
+\begin{itemize}
+    \item Tray notification: "Application minimized to system tray. Click or double-click to restore."
+    \item Notification duration: 2 seconds
+    \item Window geometry is saved before minimizing
+\end{itemize}
+
+\begin{infobox}[Recommended Usage]
+Enable this option if you want to keep the program always running in the background for quick access to tray menu functions (Quick Save, Restore Latest) without the main window occupying taskbar space.
+\end{infobox}
 
 \subsection{Automatic Backup Cleanup Limit}
 
-Configures the maximum number of backups to maintain. When the limit is exceeded, the oldest backups are automatically deleted.
+Configures the maximum number of backup files to maintain. When this limit is exceeded after a save operation, the oldest backups are automatically deleted.
 
-\textbf{Available Options}:
+\textbf{Available Options with Values}:
 \begin{itemize}
-    \item \textbf{Disabled (Keep All)}: No limit (value: 0)
-    \item \textbf{Keep Last 5}: Keeps only the last 5 backups
-    \item \textbf{Keep Last 10}: Keeps only the last 10 backups
-    \item \textbf{Keep Last 25}: Keeps only the last 25 backups
-    \item \textbf{Keep Last 50}: Keeps only the last 50 backups
+    \item \textbf{Disabled (Keep All)}: No limit, all backups retained indefinitely (value: 0)
+    \item \textbf{Keep Last 5}: Maintains only 5 most recent backups (value: 5)
+    \item \textbf{Keep Last 10}: Maintains only 10 most recent backups (value: 10)
+    \item \textbf{Keep Last 25}: Maintains only 25 most recent backups (value: 25)
+    \item \textbf{Keep Last 50}: Maintains only 50 most recent backups (value: 50)
 \end{itemize}
 
-\begin{infobox}[Recommended Strategy]
-For daily use, \textbf{Keep Last 10} offers a good balance between security and disk space usage. For power users who frequently change configuration, \textbf{Keep Last 25} or more is recommended.
+\textbf{Cleanup Operation Details}:
+\begin{enumerate}
+    \item Cleanup runs automatically after each successful save
+    \item Backups are sorted by timestamp (oldest first)
+    \item Only files exceeding the limit are deleted
+    \item Deletion is logged with filename for each file
+    \item Current backup being created is never deleted
+    \item If limit is 0 (Disabled), cleanup is completely skipped
+\end{enumerate}
+
+\textbf{Example Log Output (Limit = 10, Current Count = 12)}:
+\begin{verbatim}
+[14:50:30] Cleanup needed: Current count (12) exceeds limit (10).
+           Deleting 2 oldest file(s).
+[14:50:30]   Deleted oldest backup: 1920x1080_20241201_100000.json
+[14:50:30]   Deleted oldest backup: 1920x1080_20241202_120000.json
+[14:50:30] Cleanup complete. Total deleted: 2 file(s).
+\end{verbatim}
+
+\begin{infobox}[Recommended Strategy by User Type]
+\begin{itemize}
+    \item \textbf{Casual Users}: Keep Last 5-10 (sufficient for most needs)
+    \item \textbf{Daily Users}: Keep Last 10-25 (balances history and space)
+    \item \textbf{Power Users}: Keep Last 25-50 (extensive history for experimentation)
+    \item \textbf{Archivists}: Disabled (manual management, export important backups)
+\end{itemize}
 \end{infobox}
 
 \section{Advanced Backup Management}
 
 \subsection{Backup Manager Window}
 
-The Backup Manager window offers a complete view of all saved backups.
+The Backup Manager provides a professional interface for managing all saved backups with advanced features.
 
-\subsubsection{Information Columns}
+\subsubsection{Search and Filter Bar}
+
+\textbf{Location}: Top of the window, immediately below the instruction label
+
+\textbf{Functionality}:
+\begin{itemize}
+    \item Real-time filtering as you type
+    \item Case-insensitive search
+    \item Searches across all displayed information: tag, resolution, icon count, timestamp
+    \item Clear button (X) to quickly reset filter
+    \item Placeholder text: "Search by tag, resolution, or date..."
+\end{itemize}
+
+\textbf{Search Examples}:
+\begin{itemize}
+    \item Type "1920" → Shows only backups saved at 1920×* resolution
+    \item Type "work" → Shows backups with "work" in their tag/description
+    \item Type "2024/12" → Shows backups from December 2024
+    \item Type "15" → Shows backups with 15 icons or saved on the 15th day
+\end{itemize}
+
+\subsubsection{Backup List Columns}
+
+The list displays backups in a monospaced font (Consolas) for perfect column alignment:
 
 \begin{enumerate}
-    \item \textbf{TAG/DESCRIPTION}: Description or tag assigned to the backup
-    \item \textbf{RESOLUTION}: Monitor resolution at the time of saving
-    \item \textbf{ICONS}: Number of saved icons
-    \item \textbf{TIMESTAMP}: Backup date and time in readable format
+    \item \textbf{TAG/DESCRIPTION} (40 chars width): User-provided description, truncated with "..." if longer than 38 characters, shown in brackets [Description Here]
+    \item \textbf{RESOLUTION} (12 chars width): Monitor resolution at save time (e.g., "1920x1080")
+    \item \textbf{ICONS} (5 chars width): Number of icons in the backup, right-aligned
+    \item \textbf{TIMESTAMP} (variable width): Human-readable date/time in format "YYYY/MM/DD HH:MM:SS"
 \end{enumerate}
+
+\textbf{Example List Display}:
+\begin{verbatim}
+TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
+[Work Setup Final]         | 1920x1080     |    12 | 2024/12/11 14:30:15
+[Gaming Layout]            | 2560x1440     |    18 | 2024/12/10 22:15:00
+[Clean Desktop]            | 1920x1080     |     5 | 2024/12/09 09:00:00
+[Auto-Save on Exit]        | 1920x1080     |    12 | 2024/12/08 18:45:30
+\end{verbatim}
+
+\subsubsection{Visual Preview Panel}
+
+\textbf{Location}: Right side of the window
+
+\textbf{Features}:
+\begin{itemize}
+    \item Fixed size: 220×124 pixels
+    \item Dark background (\#1a1a1a) with subtle border
+    \item Icons displayed as blue dots (\#0078d7, 3px thickness)
+    \item Automatic scaling to fit preview area
+    \item Updates dynamically when selecting different backups
+    \item Shows "No Preview Available" when no backup is selected
+\end{itemize}
+
+\textbf{Scaling Calculation}:
+\begin{itemize}
+    \item Preview uses saved resolution from backup file
+    \item Scale X = Preview Width / Saved Width
+    \item Scale Y = Preview Height / Saved Height
+    \item Each icon position is multiplied by scale factors
+    \item Positions are clamped to preview boundaries
+\end{itemize}
+
+\subsubsection{Information Panel}
+
+Displays detailed metadata for the selected backup:
+
+\begin{verbatim}
+File: 1920x1080_20241211_143015.json
+Icons: 12
+Resolution: 1920x1080
+Description: Work Setup Final
+Timestamp: 2024-12-11T14:30:15.123456
+\end{verbatim}
 
 \subsubsection{Available Operations}
 
-\textbf{Restore}:
+\textbf{Restore Operations}:
 \begin{itemize}
-    \item Double-click on a backup
-    \item Selection + click on "Restore Selected Layout"
-    \item Right-click > "Restore Selected"
+    \item Double-click any backup in the list
+    \item Select backup + click "Restore Selected Layout" button
+    \item Right-click backup $\rightarrow$ "Restore Selected" in context menu
 \end{itemize}
 
-\textbf{Delete}:
+\textbf{Delete Operations}:
 \begin{itemize}
-    \item Right-click on a backup > "Delete Selected"
-    \item Confirmation required before deletion
+    \item Right-click backup $\rightarrow$ "Delete Selected"
+    \item Confirmation dialog shows before deletion
+    \item Successful deletion refreshes the list automatically
+    \item List view updates to reflect removal
+\end{itemize}
+
+\textbf{Selection Behavior}:
+\begin{itemize}
+    \item Single-selection mode (one backup at a time)
+    \item Selection changes update preview and info panels immediately
+    \item "Restore Selected Layout" button disabled when no valid selection
+    \item Keyboard navigation supported (arrow keys, Enter to restore)
 \end{itemize}
 
 \subsection{Backup File Format}
 
-Backups are saved as JSON files in the \texttt{icon\_backups} folder.
+Backups are stored as human-readable JSON files in the \texttt{icon\_backups} subfolder.
 
-\textbf{Naming Convention}:
+\subsubsection{File Naming Convention}
+
+\textbf{Modern Format (current version)}:
 \begin{verbatim}
 [Resolution]_[Date]_[Time].json
 
-Example: 1920x1080_20241211_143000.json
+Pattern: {width}x{height}_{YYYYMMDD}_{HHMMSS}.json
+Example: 1920x1080_20241211_143015.json
 \end{verbatim}
 
-\textbf{JSON File Structure}:
+\textbf{Legacy Format (compatibility)}:
+\begin{verbatim}
+[Date]_[Time].json
+
+Pattern: {YYYYMMDD}_{HHMMSS}.json
+Example: 20241211_143015.json
+\end{verbatim}
+
+\begin{infobox}[Backward Compatibility]
+The program can read and restore from both modern and legacy formats. Legacy files show "N/A" for resolution in the Backup Manager.
+\end{infobox}
+
+\subsubsection{JSON File Structure (Complete)}
+
+\textbf{Modern Format with Full Metadata}:
 \begin{verbatim}
 {
-    "timestamp": "2024-12-11T14:30:00.123456",
-    "icon_count": 15,
-    "description": "Backup Before Meeting",
+    "timestamp": "2024-12-11T14:30:15.123456",
+    "icon_count": 12,
+    "description": "Work Setup Final",
     "display_metadata": {
-        "monitor_count": 1,
+        "monitor_count": 2,
         "primary_resolution": "1920x1080",
-        "screens": [...]
+        "screens": [
+            {
+                "id": 0,
+                "name": "\\.\DISPLAY1",
+                "width": 1920,
+                "height": 1080,
+                "pixel_density": 1.0
+            },
+            {
+                "id": 1,
+                "name": "\\.\DISPLAY2",
+                "width": 1920,
+                "height": 1080,
+                "pixel_density": 1.0
+            }
+        ]
     },
     "icons": {
-        "Computer": [100, 200],
-        "Documents": [100, 350],
-        ...
+        "This PC": [100, 200],
+        "Recycle Bin": [100, 350],
+        "Documents": [100, 500],
+        "Downloads": [100, 650],
+        "Pictures": [100, 800],
+        "Music": [100, 950],
+        "Videos": [250, 200],
+        "Desktop": [250, 350],
+        "Network": [250, 500],
+        "Control Panel": [250, 650],
+        "User Files": [250, 800],
+        "Shortcuts": [250, 950]
     }
+}
+\end{verbatim}
+
+\textbf{Legacy Format (Old Backups)}:
+\begin{verbatim}
+{
+    "This PC": [100, 200],
+    "Recycle Bin": [100, 350],
+    "Documents": [100, 500],
+    ...
 }
 \end{verbatim}
 
@@ -426,39 +739,94 @@ Example: 1920x1080_20241211_143000.json
 
 \subsection{System Tray Context Menu}
 
-Right-click on the system tray icon to access:
+Right-click on the system tray icon to access quick functions:
 
 \begin{itemize}
-    \item \textbf{Quick Save}: Saves a quick backup with default tag "Quick Save (Tray)"
-    \item \textbf{Restore Latest}: Restores the last saved backup
-    \item \textbf{Show Window}: Shows the main window
-    \item \textbf{Exit}: Completely closes the application
+    \item \textbf{Quick Save}: Creates immediate backup with tag "Quick Save (Tray)"
+    \item \textbf{Restore Latest}: Restores most recent backup without confirmation
+    \item \textbf{Show Window}: Brings main window to front and activates it
+    \item \textbf{Exit}: Completely closes application (bypasses "Minimize to Tray" setting)
 \end{itemize}
 
-\subsection{Notifications}
-
-The program shows notifications from the system tray for:
+\textbf{Icon Activation Behaviors}:
 \begin{itemize}
-    \item Operation completion when the window is hidden
-    \item Critical errors
-    \item Minimized startup
-    \item Minimization from window closure
+    \item \textbf{Double-click}: Shows main window (same as "Show Window")
+    \item \textbf{Single-click}: No action (prevents accidental triggers)
+    \item \textbf{Right-click}: Opens context menu
+\end{itemize}
+
+\subsection{Tray Notifications}
+
+The program displays system tray notifications for important events:
+
+\textbf{When Window Is Hidden}:
+\begin{itemize}
+    \item Operation completion messages (Save/Restore/Scramble successful)
+    \item Critical errors during background operations
+    \item Warning messages requiring user attention
+\end{itemize}
+
+\textbf{Always Displayed}:
+\begin{itemize}
+    \item Application started minimized to tray
+    \item Application minimized to tray from window close
+    \item Quick operation confirmations from tray menu
+\end{itemize}
+
+\textbf{Notification Duration}:
+\begin{itemize}
+    \item Standard messages: 2000 milliseconds (2 seconds)
+    \item Warning/Error messages: 5000 milliseconds (5 seconds)
 \end{itemize}
 
 \section{Keyboard Shortcuts}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|p{7cm}|}
 \hline
-\textbf{Shortcut} & \textbf{Action} \\
+\textbf{Shortcut} & \textbf{Action} & \textbf{Description} \\
 \hline
-\texttt{Ctrl+S} & Quick save \\
-\texttt{Ctrl+Q} & Exit application \\
+\texttt{Ctrl+S} & Quick Save & Saves current layout with optional tag from input field \\
+\hline
+\texttt{Ctrl+Q} & Exit Application & Closes program completely, respects Auto-Save setting \\
 \hline
 \end{tabular}
 \caption{Available keyboard shortcuts}
 \end{table}
+
+\begin{infobox}[Future Enhancements]
+Additional keyboard shortcuts may be added in future versions based on user feedback. Consider suggesting useful shortcuts through the project repository.
+\end{infobox}
+
+\section{Help Menu}
+
+\subsection{Online User Manual}
+
+Opens the complete PDF user manual in your default browser.
+
+\textbf{URL}: \url{https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf}
+
+\textbf{Manual Contents}:
+\begin{itemize}
+    \item Complete feature documentation
+    \item Step-by-step tutorials
+    \item Troubleshooting guides
+    \item Best practices and recommendations
+    \item Technical reference information
+\end{itemize}
+
+\subsection{About Dialog}
+
+Displays program information including:
+
+\begin{itemize}
+    \item Program name and description
+    \item Complete feature list with descriptions
+    \item Current version number
+    \item Developer information (mapi68)
+    \item Quick reference to key features
+\end{itemize}
 
 \section{Troubleshooting}
 
@@ -470,93 +838,650 @@ The program shows notifications from the system tray for:
 
 \textbf{Solution}:
 \begin{enumerate}
-    \item Right-click on the desktop
-    \item Select \texttt{View > Show desktop icons}
+    \item Right-click on empty area of desktop
+    \item Navigate to \texttt{View > Show desktop icons}
+    \item Verify checkmark appears next to "Show desktop icons"
     \item Restart the program
+    \item If error persists, check Windows Explorer is running (Ctrl+Shift+Esc, look for explorer.exe)
 \end{enumerate}
+
+\textbf{Advanced Troubleshooting}:
+\begin{itemize}
+    \item Restart Windows Explorer via Task Manager
+    \item Check if third-party desktop replacement software is interfering
+    \item Verify no group policies are hiding desktop icons
+    \item Run program as administrator (if standard permissions fail)
+\end{itemize}
 
 \subsubsection{Icons Restored to Wrong Positions}
 
-\textbf{Cause}: Resolution change or different monitor configuration.
+\textbf{Cause}: Resolution change, different monitor configuration, or disabled scaling.
 
 \textbf{Solutions}:
 \begin{enumerate}
-    \item Enable "Enable Adaptive Scaling on Restore" in settings
-    \item Create separate backups for each monitor configuration
-    \item Verify that current resolution matches the backup
+    \item Enable "Enable Adaptive Scaling on Restore" in Settings menu
+    \item Create separate backups for each monitor configuration with descriptive tags
+    \item Verify current resolution matches saved resolution in backup details
+    \item Check backup was created on same physical monitor setup
+    \item Use Backup Manager preview to verify layout before restoring
 \end{enumerate}
 
-\subsubsection{Backup Not Found}
+\textbf{Multi-Monitor Specific Issues}:
+\begin{itemize}
+    \item Ensure same monitors are connected in same positions
+    \item Check Windows display arrangement matches saved configuration
+    \item Primary monitor must be same as when backup was created
+    \item Monitor orientation (landscape/portrait) must match
+\end{itemize}
 
-\textbf{Cause}: Corrupted or deleted backup file, missing \texttt{icon\_backups} folder.
+\subsubsection{Backup File Not Found}
+
+\textbf{Cause}: Corrupted or deleted backup file, missing \texttt{icon\_backups} folder, file permissions.
 
 \textbf{Solution}:
 \begin{enumerate}
-    \item Verify existence of \texttt{icon\_backups} folder
-    \item Check read/write permissions
-    \item Verify JSON file integrity
+    \item Verify \texttt{icon\_backups} folder exists in program directory
+    \item Check folder contains .json files
+    \item Verify read/write permissions on folder and files
+    \item Open JSON file in text editor to check for corruption
+    \item Restore from Windows backup if available
+    \item Check Recycle Bin for accidentally deleted backups
 \end{enumerate}
 
-\subsection{Logging and Diagnostics}
+\textbf{JSON Validation}:
+\begin{itemize}
+    \item Open file in text editor (Notepad++, VS Code)
+    \item Verify valid JSON format (matching braces, proper quotes)
+    \item Check file is not empty (minimum valid backup is $\sim$100 bytes)
+    \item Use online JSON validator if unsure about format
+\end{itemize}
 
-The "Activity Log" area records all operations and errors. For advanced diagnostics:
+\subsubsection{Program Crashes on Startup}
 
+\textbf{Possible Causes and Solutions}:
+
+\textbf{Corrupted settings.ini}:
+\begin{enumerate}
+    \item Delete \texttt{settings.ini} file from program directory
+    \item Restart program (will recreate with defaults)
+    \item Reconfigure your preferences
+\end{enumerate}
+
+\textbf{Auto-Restore failure}:
+\begin{enumerate}
+    \item Disable "Auto-Restore on Startup" by editing settings.ini manually
+    \item Set \texttt{auto\_restore\_on\_startup=false}
+    \item Restart program and investigate problematic backup
+\end{enumerate}
+
+\textbf{Missing dependencies (source installation)}:
+\begin{enumerate}
+    \item Reinstall PyQt6: \texttt{pip install --upgrade PyQt6}
+    \item Reinstall pywin32: \texttt{pip install --upgrade pywin32}
+    \item Check Python version is 3.8 or higher
+\end{enumerate}
+
+\subsubsection{Scramble Operation Fails}
+
+\textbf{Cause}: Pre-scramble backup failure, insufficient permissions, or desktop access issues.
+
+\textbf{Solution}:
+\begin{enumerate}
+    \item Check Activity Log for specific error message
+    \item Verify sufficient disk space for backup creation
+    \item Ensure \texttt{icon\_backups} folder is writable
+    \item Try manual backup first to test functionality
+    \item Close any programs that might lock desktop access
+\end{enumerate}
+
+\subsubsection{Settings Not Persisting}
+
+\textbf{Cause}: Write permissions, settings.ini location, or application not closing properly.
+
+\textbf{Solution}:
+\begin{enumerate}
+    \item Check settings.ini exists in application directory
+    \item Verify write permissions on settings.ini file
+    \item Use \texttt{File > Exit} or Ctrl+Q instead of Task Manager
+    \item Don't force-close during "Saving settings..." operations
+    \item Run as administrator if in protected directory
+\end{enumerate}
+
+\subsection{Diagnostics}
+
+\textbf{For Advanced Diagnostics}:
 \begin{enumerate}
     \item Execute the problematic operation
-    \item Copy the log content
-    \item Check specific error messages
-    \item Verify \texttt{settings.ini} file for incorrect configurations
+    \item Copy complete log content (Ctrl+A in log area, Ctrl+C)
+    \item Check for specific error messages
+    \item Note exact timestamp of error
+    \item Verify settings.ini for incorrect configurations
+    \item Check Windows Event Viewer for system-level errors
 \end{enumerate}
+
+\subsection{Performance Issues}
+
+\subsubsection{Slow Save/Restore Operations}
+
+\textbf{Normal Expected Times}:
+\begin{itemize}
+    \item Save operation: 1-3 seconds for 10-20 icons
+    \item Restore operation: 2-5 seconds for 10-20 icons
+    \item Scramble operation: 3-6 seconds total (includes backup)
+\end{itemize}
+
+\textbf{If Operations Are Slower}:
+\begin{itemize}
+    \item Check CPU usage (Task Manager) - high usage indicates issue
+    \item Verify disk is not at 100\% usage (slow HDD can cause delays)
+    \item Scan for malware/viruses affecting system performance
+    \item Close resource-intensive applications during operations
+    \item Consider SSD upgrade if using mechanical hard drive
+\end{itemize}
+
+\subsubsection{High Memory Usage}
+
+\textbf{Normal Memory Usage}:
+\begin{itemize}
+    \item Idle: 50-80 MB
+    \item During operation: 80-120 MB
+    \item With large backup list: 100-150 MB
+\end{itemize}
+
+\textbf{If Memory Is Excessive}:
+\begin{itemize}
+    \item Close and reopen program (clears accumulated memory)
+    \item Check for memory leaks (usage grows over time without activity)
+    \item Report issue with version number and system specs
+\end{itemize}
 
 \section{Best Practices}
 
 \subsection{Optimal Backup Strategy}
 
-\begin{successbox}[Recommended Configuration]
+\begin{successbox}[Recommended Configuration for Most Users]
 \begin{itemize}
-    \item Enable "Auto-Save on Exit"
-    \item Set automatic cleanup limit to 10-25 backups
-    \item Create manual backups before important changes
-    \item Use descriptive tags for important backups
+    \item Enable "Auto-Save on Exit" for safety net
+    \item Set cleanup limit to 10-25 backups (balances history and space)
+    \item Create manual backups with descriptive tags before major changes
+    \item Use descriptive tags like "Before Windows Update", "Gaming Setup", etc.
+    \item Test restore operation occasionally to verify backups work
 \end{itemize}
 \end{successbox}
 
+\subsection{Backup Naming Best Practices}
+
+\textbf{Effective Tag Examples}:
+\begin{itemize}
+    \item \textbf{Descriptive}: "Work Setup - Dual Monitor", "Gaming - Single Screen"
+    \item \textbf{Temporal}: "Before Windows Update 2024-12", "End of Year Layout"
+    \item \textbf{Purpose}: "Clean Desktop Minimal", "Development Environment"
+    \item \textbf{Event-based}: "Pre-Hardware Upgrade", "After Monitor Replacement"
+\end{itemize}
+
+\textbf{Avoid}:
+\begin{itemize}
+    \item Generic tags: "backup1", "test", "new"
+    \item Too long descriptions (truncated after 38 characters)
+    \item Special characters that might cause issues: \textbackslash / : * ? " < > |
+\end{itemize}
+
 \subsection{Multi-Monitor Management}
 
-For multi-monitor configurations:
+For systems with changing monitor configurations:
 
 \begin{enumerate}
-    \item Create separate backups for each configuration
-    \item Use descriptive tags: "2 Monitors", "Single Monitor", etc.
-    \item Do not enable auto-restore if frequently changing configuration
-    \item Always verify monitor configuration before restoring
+    \item Create separate backups for each configuration with clear tags
+    \item Tag examples: "1 Monitor - Laptop Only", "2 Monitors - Office Setup", "3 Monitors - Home Studio"
+    \item Disable auto-restore if frequently switching configurations
+    \item Always verify current monitor setup before restoring
+    \item Use Backup Manager preview to visually confirm layout
+    \item Consider creating backup before connecting/disconnecting monitors
 \end{enumerate}
+
+\textbf{Docking Station Workflows}:
+\begin{itemize}
+    \item \textbf{Backup "Laptop Undocked"}: Before connecting to dock
+    \item \textbf{Backup "Laptop Docked"}: After connecting monitors
+    \item Use Backup Manager to quickly switch between configurations
+    \item Consider enabling adaptive scaling for similar resolutions
+\end{itemize}
+
+\subsection{Resolution Change Scenarios}
+
+\textbf{When Upgrading Monitor}:
+\begin{enumerate}
+    \item Create backup with descriptive tag before upgrade
+    \item Note old resolution in tag: "Old Monitor 1920x1080"
+    \item After upgrade, test restore with scaling enabled
+    \item Adjust manually if needed, then save new backup
+    \item Keep old backup for reference or if reverting
+\end{enumerate}
+
+\textbf{When Using Laptop with Different External Monitors}:
+\begin{itemize}
+    \item Create backup for each location: "Home Office", "Work Office", "Portable"
+    \item Include resolution in tag if significantly different
+    \item Test adaptive scaling effectiveness for each pair
+    \item Keep laptop-only backup as fallback
+\end{itemize}
 
 \subsection{Regular Maintenance}
 
+\textbf{Weekly}:
 \begin{itemize}
-    \item Periodically review saved backups
-    \item Manually delete obsolete backups if necessary
-    \item Check \texttt{icon\_backups} folder for space usage
-    \item Export important backups to safe locations
+    \item Review recent backups in Backup Manager
+    \item Delete any test or unnecessary backups
+    \item Verify auto-save/restore working as expected
+\end{itemize}
+
+\textbf{Monthly}:
+\begin{itemize}
+    \item Check \texttt{icon\_backups} folder size
+    \item Export important backups to external location
+    \item Test restore operation to verify functionality
+    \item Review and update cleanup limit if needed
+\end{itemize}
+
+\textbf{Before Major Events}:
+\begin{itemize}
+    \item Windows Updates: Create manual backup with tag
+    \item Hardware changes: Backup before and after
+    \item System reinstall: Export all backups to safe location
+    \item Monitor changes: Backup both before and after
+\end{itemize}
+
+\subsection{Backup Archiving Strategy}
+
+\textbf{Export Important Backups}:
+\begin{enumerate}
+    \item Navigate to \texttt{icon\_backups} folder
+    \item Copy important .json files to safe location
+    \item Consider cloud storage (Dropbox, OneDrive, Google Drive)
+    \item USB drive backup for critical configurations
+    \item Include in regular system backup routine
+\end{enumerate}
+
+\textbf{When to Export}:
+\begin{itemize}
+    \item Perfect layouts you want to preserve forever
+    \item Before system migrations or reinstalls
+    \item Company/work standardized layouts
+    \item Configurations that took significant time to create
 \end{itemize}
 
 \section{Frequently Asked Questions (FAQ)}
 
-\subsection{Does the program work with Windows 11?}
-Yes, the program is fully compatible with Windows 11 and all previous versions starting from Windows 7.
+\subsection{General Questions}
 
-\subsection{Can I use the program with virtual desktops?}
-The program manages icons on the main desktop. Icons on Windows 10/11 virtual desktops are managed by the same system, so the backup includes all visible icons.
+\textbf{Q: Does the program work with Windows 11?}
 
-\subsection{Are backups portable between different computers?}
-Yes, JSON files can be copied between computers. However, positions may not be accurate if resolutions differ. Use adaptive scaling for best results.
+A: Yes, fully compatible with Windows 11 and all versions back to Windows 7. The program uses standard Windows APIs that work across all versions.
 
-\subsection{How much space do backups occupy?}
-Each backup typically occupies 2-10 KB depending on the number of icons. With 50 backups, total usage is generally less than 500 KB.
+\textbf{Q: Can I use the program with virtual desktops?}
 
-\subsection{Can I manually edit backup files?}
-Yes, they are standard JSON files. You can edit them with a text editor, but be careful with JSON syntax to avoid file corruption.
+A: Windows virtual desktops share the same physical desktop icon layout. Backups include all visible icons regardless of which virtual desktop is active.
+
+\textbf{Q: Are backups portable between different computers?}
+
+A: Yes, JSON files can be copied between computers. However, positions may not be accurate if:
+\begin{itemize}
+    \item Screen resolutions differ (use adaptive scaling)
+    \item Monitor configurations differ (different number or arrangement)
+    \item Some icons in backup don't exist on target system
+\end{itemize}
+
+\textbf{Q: How much disk space do backups use?}
+
+A: Each backup typically occupies 2-10 KB depending on icon count. With 50 backups, total usage is generally less than 500 KB (0.5 MB).
+
+\textbf{Q: Can I manually edit backup files?}
+
+A: Yes, they are standard JSON text files. You can edit with any text editor. Be careful with JSON syntax to avoid corruption. Always keep backup copies before editing.
+
+\subsection{Feature Questions}
+
+\textbf{Q: Why create backup before scramble?}
+
+A: This mandatory backup ensures you can always restore your original layout. Without it, scrambling would be destructive with no undo option.
+
+\textbf{Q: What happens to icons not in backup during restore?}
+
+A: Icons currently on desktop but not in backup remain where they are. Only icons that exist in both the backup and current desktop are moved.
+
+\textbf{Q: Does adaptive scaling work with multi-monitor setups?}
+
+A: Scaling uses primary monitor resolution. For multi-monitor setups, it's recommended to create separate backups for each specific configuration rather than relying on scaling.
+
+\textbf{Q: Can I run multiple instances?}
+
+A: No, running multiple instances simultaneously is not supported and may cause conflicts. Only one instance should run at a time.
+
+\textbf{Q: Does the program auto-update?}
+
+A: Currently, no auto-update feature exists. Check the GitHub repository or project website for new releases and manual download.
+
+\subsection{Technical Questions}
+
+\textbf{Q: Why does the program need Windows API access?}
+
+A: Desktop icon positions are managed by Windows Explorer's ListView control. The program must use Win32 API calls to read and modify these positions, as there's no higher-level interface available.
+
+\textbf{Q: Is administrator access required?}
+
+A: No, the program runs with standard user permissions. It only accesses your own user desktop, not system-wide or other user desktops.
+
+\textbf{Q: Can antivirus software interfere?}
+
+A: Some aggressive antivirus programs may flag the memory access operations as suspicious. Add the program to your antivirus whitelist if you encounter issues.
+
+\textbf{Q: Why monospaced font in Backup Manager?}
+
+A: Monospaced fonts (Consolas) ensure perfect column alignment without complex UI frameworks, making the backup list easy to scan and read.
+
+\textbf{Q: Can I backup icon arrangement to network drive?}
+
+A: The \texttt{icon\_backups} folder must be local for proper operation. After creation, you can manually copy backups to network storage for archiving.
+
+\section{Technical Information}
+
+\subsection{Software Architecture}
+
+\textbf{Core Components}:
+
+\begin{itemize}
+    \item \textbf{PyQt6 Framework}: Modern cross-platform GUI framework providing widgets, layouts, and event handling
+    \item \textbf{pywin32 Library}: Python bindings for Windows API, enables low-level desktop access
+    \item \textbf{QThread}: Asynchronous operations prevent UI freezing during lengthy operations
+    \item \textbf{QSettings}: INI-based configuration persistence across sessions
+    \item \textbf{QSystemTrayIcon}: Native system tray integration with context menus
+\end{itemize}
+
+\textbf{Key Classes}:
+
+\begin{itemize}
+    \item \texttt{DesktopIconManager}: Core logic for save/restore/scramble operations
+    \item \texttt{IconWorker}: QThread worker for background processing
+    \item \texttt{MainWindow}: Primary application window and UI orchestration
+    \item \texttt{BackupManagerWindow}: Backup selection and management dialog
+    \item \texttt{IconPreviewWidget}: Custom widget for visual layout preview
+\end{itemize}
+
+\subsection{Remote Memory Access Process}
+
+To read icon positions, the program performs complex low-level operations:
+
+\textbf{Detailed Process}:
+\begin{enumerate}
+    \item \textbf{Find Desktop ListView}:
+    \begin{itemize}
+        \item Locate "Progman" window (Program Manager)
+        \item Find "SHELLDLL\_DefView" child window
+        \item Locate "SysListView32" control (icon container)
+        \item Fallback: Enumerate all windows if not found in standard location
+    \end{itemize}
+
+    \item \textbf{Access Remote Process}:
+    \begin{itemize}
+        \item Get Explorer process ID via \texttt{GetWindowThreadProcessId}
+        \item Open process with \texttt{PROCESS\_ALL\_ACCESS} rights
+        \item Allocate 4096 bytes in remote process memory
+    \end{itemize}
+
+    \item \textbf{Query Icon Data}:
+    \begin{itemize}
+        \item Send \texttt{LVM\_GETITEMCOUNT} message for icon count
+        \item For each icon: Send \texttt{LVM\_GETITEMPOSITION} for coordinates
+        \item For each icon: Send \texttt{LVM\_GETITEMTEXT} for icon name
+        \item Read data from remote memory to local process
+    \end{itemize}
+
+    \item \textbf{Cleanup}:
+    \begin{itemize}
+        \item Free allocated remote memory with \texttt{VirtualFreeEx}
+        \item Close process handle properly
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Constants Used}:
+\begin{verbatim}
+LVM_GETITEMCOUNT = 0x1004     # Get total icon count
+LVM_GETITEMTEXT = 0x102D      # Get icon text/name
+LVM_GETITEMPOSITION = 0x1010  # Get icon X,Y position
+LVM_SETITEMPOSITION = 0x100F  # Set icon X,Y position
+MEM_COMMIT = 0x1000           # Commit memory allocation
+MEM_RELEASE = 0x8000          # Release memory
+PAGE_READWRITE = 0x04         # Read/Write permissions
+\end{verbatim}
+
+\subsection{Data Structures}
+
+\textbf{LVITEM Structure (packed binary format)}:
+\begin{verbatim}
+Format: 'IIIIIQI' (struct.pack)
+- mask (I): 0x0001 (LVIF_TEXT flag)
+- iItem (I): Icon index
+- iSubItem (I): 0 (main item)
+- state (I): 0
+- stateMask (I): 0
+- pszText (Q): Pointer to text buffer in remote memory
+- cchTextMax (I): 512 (max text length)
+\end{verbatim}
+
+\textbf{Position Data}:
+\begin{verbatim}
+Format: Two 32-bit integers (8 bytes)
+- X coordinate (signed int)
+- Y coordinate (signed int)
+Unpacked with: struct.unpack('ii', data)
+\end{verbatim}
+
+\subsection{Threading Architecture}
+
+\textbf{Why Threading Is Essential}:
+\begin{itemize}
+    \item Icon scanning can take 2-5 seconds for many icons
+    \item Without threading, UI would freeze completely
+    \item User cannot cancel or see progress without threading
+    \item Windows messages would not be processed during operations
+\end{itemize}
+
+\textbf{Worker Thread Design}:
+\begin{itemize}
+    \item \textbf{log\_signal}: Emits log messages back to main thread
+    \item \textbf{progress\_signal}: Emits 0-100 progress values
+    \item \textbf{finished\_signal}: Emits completion status and optional data
+    \item Main thread updates UI in response to signals
+    \item Worker thread performs all Win32 API calls
+\end{itemize}
+
+\subsection{Desktop Refresh Mechanism}
+
+After modifying icon positions, the program forces desktop refresh:
+
+\begin{verbatim}
+# Re-enable window redrawing
+win32gui.SendMessage(hwnd, WM_SETREDRAW, 1, 0)
+
+# Invalidate entire ListView area
+win32gui.InvalidateRect(hwnd, None, True)
+
+# Broadcast system-wide setting change
+win32api.SendMessage(
+    HWND_BROADCAST,
+    WM_SETTINGCHANGE,
+    0,
+    "IconMetrics"
+)
+\end{verbatim}
+
+\textbf{Why This Is Necessary}:
+\begin{itemize}
+    \item Redrawing is disabled during restore for performance
+    \item InvalidateRect forces visual update of moved icons
+    \item WM\_SETTINGCHANGE notifies all applications
+    \item Without this, icons may not appear moved until manual refresh
+\end{itemize}
+
+\subsection{Settings Storage}
+
+Configuration stored in INI format for human readability:
+
+\textbf{settings.ini Location}:
+\begin{verbatim}
+[Application Directory]/settings.ini
+\end{verbatim}
+
+\textbf{Stored Settings}:
+\begin{verbatim}
+[MainWindow]
+geometry=@Rect(100 100 650 600)  # Window position and size
+
+[Settings]
+start_minimized=false
+auto_save_on_exit=true
+auto_restore_on_startup=false
+adaptive_scaling_enabled=true
+close_to_tray=false
+cleanup_limit=10
+\end{verbatim}
+
+\subsection{Security and Privacy}
+
+\begin{infobox}[Privacy Commitment]
+\begin{itemize}
+    \item No data is ever sent online or to external servers
+    \item All backups are stored locally on your computer
+    \item No telemetry, analytics, or usage tracking
+    \item No network connections made by the program
+    \item Access only to your own desktop (not other users)
+    \item Source code is available for inspection
+\end{itemize}
+\end{infobox}
+
+\textbf{Data Stored}:
+\begin{itemize}
+    \item Icon names and positions only
+    \item Screen resolution metadata
+    \item User-provided descriptions/tags
+    \item Application preferences (local settings.ini)
+\end{itemize}
+
+\textbf{No Sensitive Data}:
+\begin{itemize}
+    \item No file contents or documents
+    \item No passwords or credentials
+    \item No browsing history or personal information
+    \item No system information beyond screen resolution
+\end{itemize}
+
+\section{Advanced Usage}
+
+\subsection{Command Line Arguments}
+
+Currently, the program does not support command-line arguments. Future versions may include:
+\begin{itemize}
+    \item Silent backup mode: \texttt{--backup --silent}
+    \item Silent restore mode: \texttt{--restore latest --silent}
+    \item Specify backup file: \texttt{--restore "filename.json"}
+\end{itemize}
+
+\subsection{Automation with Task Scheduler}
+
+You can create scheduled automatic backups using Windows Task Scheduler:
+
+\begin{enumerate}
+    \item Open Task Scheduler
+    \item Create Basic Task
+    \item Name: "Desktop Icon Backup - Daily"
+    \item Trigger: Daily at preferred time
+    \item Action: Start a program
+    \item Program: Path to desktop-icon-backup-manager.exe
+    \item Enable: "Run whether user is logged on or not"
+\end{enumerate}
+
+\textbf{Important Notes}:
+\begin{itemize}
+    \item Program must be running for scheduled task
+    \item Or enable "Auto-Save on Exit" and schedule shutdown after
+    \item Task runs in background if "Start Minimized" is enabled
+\end{itemize}
+
+\subsection{Batch Operations with JSON}
+
+For advanced users comfortable with JSON editing:
+
+\textbf{Merge Multiple Backups}:
+\begin{enumerate}
+    \item Open two backup JSON files
+    \item Copy icon entries from one "icons" section to another
+    \item Ensure no duplicate icon names (second will override first)
+    \item Save merged file with new name
+    \item Restore merged backup
+\end{enumerate}
+
+\textbf{Manual Position Adjustment}:
+\begin{enumerate}
+    \item Open backup JSON in text editor
+    \item Locate icon name in "icons" section
+    \item Modify [X, Y] coordinates (e.g., [100, 200])
+    \item Save file
+    \item Restore modified backup
+\end{enumerate}
+
+\textbf{Bulk Position Shift}:
+\begin{itemize}
+    \item Write script to add offset to all coordinates
+    \item Useful for moving entire layout left/right/up/down
+    \item Python script example available in project documentation
+\end{itemize}
+
+\section{Development and Contribution}
+
+\subsection{Building from Source}
+
+\textbf{Requirements}:
+\begin{verbatim}
+Python 3.8+
+PyQt6
+pywin32
+\end{verbatim}
+
+\textbf{Setup}:
+\begin{verbatim}
+git clone [repository-url]
+cd desktop-icon-backup-manager
+pip install -r requirements.txt
+python desktop-icon-backup-manager.py
+\end{verbatim}
+
+\textbf{Building Executable with PyInstaller}:
+\begin{verbatim}
+pip install pyinstaller
+pyinstaller --onefile --windowed --icon=icon.ico \
+    --name="desktop-icon-backup-manager" \
+    desktop-icon-backup-manager.py
+\end{verbatim}
+
+\subsection{Translation/Localization}
+
+The program uses Qt's translation system for internationalization:
+
+\textbf{Creating New Translation}:
+\begin{enumerate}
+    \item Extract translatable strings: \texttt{pylupdate6 *.py -ts i18n/lang.ts}
+    \item Translate strings using Qt Linguist
+    \item Compile: \texttt{lrelease i18n/lang.ts}
+    \item Place .qm file in i18n folder
+    \item Program auto-detects system language
+\end{enumerate}
+
+\textbf{Currently Supported Languages}:
+\begin{itemize}
+    \item English (en) - Default
+     \item Italian (it)
+    \item Add your language via contribution!
+\end{itemize}
 
 \section{Technical Information}
 
