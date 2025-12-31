@@ -135,7 +135,6 @@ def get_readable_date(filename: str) -> str:
 def get_resolution_from_filename(filename: str) -> str:
     return parse_backup_filename(filename)[1]
 
-
 # --- WIDGET: VISUAL PREVIEW ---
 class IconPreviewWidget(QWidget):
     def __init__(self, parent=None):
@@ -170,7 +169,6 @@ class IconPreviewWidget(QWidget):
             x = max(2, min(x, self.width() - 2))
             y = max(2, min(y, self.height() - 2))
             painter.drawPoint(x, y)
-
 
 # --- BACKEND: Icon management logic ---
 class DesktopIconManager:
@@ -558,7 +556,6 @@ class DesktopIconManager:
             win32gui.InvalidateRect(self.hwnd_listview, None, True)
             win32api.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "IconMetrics")
 
-
 # --- THREADING: Worker ---
 class IconWorker(QThread):
     log_signal = pyqtSignal(str)
@@ -633,20 +630,27 @@ class BackupManagerWindow(QDialog):
     def __init__(self, manager: DesktopIconManager, parent=None):
         super().__init__(parent)
         self.manager = manager
-        #
         self.setWindowTitle(self.tr("Select, Restore, or Delete Backup"))
-        self.setFixedSize(800, 450)
+        self.setFixedSize(800, 500)  # Increased height to accommodate the search bar
 
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(10)
 
-        #
+        # Instructions label
         self.layout.addWidget(QLabel(self.tr("Select a backup to restore or right-click to delete.")))
+
+        # --- SEARCH FILTER UI ---
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(self.tr("Search by tag, resolution, or date..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.textChanged.connect(self.filter_backups)
+        self.layout.addWidget(self.search_input)
+        # ------------------------
 
         h_split = QHBoxLayout()
         left_panel = QVBoxLayout()
 
-        #
+        # Header with fixed-width font for alignment
         header_text = (
             f"{self.tr('TAG/DESCRIPTION'):<40} "
             f"| {self.tr('RESOLUTION'):<12} "
@@ -664,14 +668,13 @@ class BackupManagerWindow(QDialog):
 
         h_split.addLayout(left_panel, 3)
 
+        # Right panel for preview and details
         right_panel = QVBoxLayout()
-        #
         right_panel.addWidget(QLabel(self.tr("Layout Preview:")))
 
         self.preview_widget = IconPreviewWidget()
         right_panel.addWidget(self.preview_widget)
 
-        #
         self.info_label = QLabel(self.tr("Select a backup to see details."))
         self.info_label.setWordWrap(True)
         self.info_label.setStyleSheet("color: #555; font-size: 11px; padding: 10px;")
@@ -681,15 +684,13 @@ class BackupManagerWindow(QDialog):
         h_split.addLayout(right_panel, 1)
         self.layout.addLayout(h_split)
 
+        # Bottom buttons
         button_layout = QHBoxLayout()
-
-        #
         self.btn_restore = QPushButton(self.tr("Restore Selected Layout"))
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         self.btn_restore.setObjectName("restoreButton")
 
-        #
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.clicked.connect(self.reject)
 
@@ -698,6 +699,7 @@ class BackupManagerWindow(QDialog):
         button_layout.addWidget(self.btn_close)
         self.layout.addLayout(button_layout)
 
+        # Signals connections
         self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
         self.list_widget.itemDoubleClicked.connect(self.restore_selected)
         self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -706,11 +708,11 @@ class BackupManagerWindow(QDialog):
         self.load_backups()
 
     def load_backups(self):
+        """Loads all backup files and populates the list widget."""
         self.list_widget.clear()
         backups = self.manager.get_all_backup_filenames()
 
         if not backups:
-            #
             QListWidgetItem(self.tr("No backups found."), self.list_widget)
             self.btn_restore.setEnabled(False)
             return
@@ -729,6 +731,7 @@ class BackupManagerWindow(QDialog):
             except Exception:
                 pass
 
+            # Format the display string to align with the header
             description_display = f"{f'[{description[:38]}]':<41}"
             resolution_display = f"| {resolution:<13}"
             icon_count_display = f"| {icon_count:>5}"
@@ -746,11 +749,19 @@ class BackupManagerWindow(QDialog):
 
         self.update_button_states()
 
+    def filter_backups(self, query):
+        """Filters list items in real-time based on the search input."""
+        query = query.lower()
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            # Case-insensitive search within the entire display text
+            item.setHidden(query not in item.text().lower())
+
     def on_selection_changed(self):
+        """Handles item selection to update the preview and info panel."""
         items = self.list_widget.selectedItems()
-        if not items:
+        if not items or items[0].data(Qt.ItemDataRole.UserRole) is None:
             self.preview_widget.update_preview({}, (1920, 1080))
-            #
             self.info_label.setText(self.tr("Select a backup to see details."))
             self.btn_restore.setEnabled(False)
             return
@@ -767,7 +778,6 @@ class BackupManagerWindow(QDialog):
 
                 self.preview_widget.update_preview(icons, res_tuple)
 
-                #
                 description = data.get('description', self.tr('None'))
                 timestamp = data.get('timestamp', 'N/A')
                 info_text = (
@@ -781,27 +791,29 @@ class BackupManagerWindow(QDialog):
                 self.btn_restore.setEnabled(True)
         except Exception as e:
             self.preview_widget.update_preview({}, (1920, 1080))
-            #
-            self.info_label.setText(self.tr("Error loading backup:\n%1").replace("%1", str(str(e))))
+            self.info_label.setText(self.tr("Error loading backup:\n%1").replace("%1", str(e)))
             self.btn_restore.setEnabled(False)
 
     def update_button_states(self):
+        """Enables/disables buttons based on selection."""
         has_selection = bool(self.list_widget.selectedItems())
+        # Ensure the 'No backups found' item doesn't enable the button
+        if has_selection and self.list_widget.selectedItems()[0].data(Qt.ItemDataRole.UserRole) is None:
+            has_selection = False
         self.btn_restore.setEnabled(has_selection)
 
     def show_context_menu(self, pos: QPoint):
+        """Right-click menu for quick actions."""
         selected_item = self.list_widget.itemAt(pos)
-        if selected_item:
+        if selected_item and selected_item.data(Qt.ItemDataRole.UserRole):
             context_menu = QMenu(self)
 
-            #
             action_restore = QAction(self.tr("Restore Selected"), self)
             action_restore.triggered.connect(self.restore_selected)
             context_menu.addAction(action_restore)
 
             context_menu.addSeparator()
 
-            #
             action_delete = QAction(self.tr("Delete Selected"), self)
             action_delete.triggered.connect(self.delete_selected)
             context_menu.addAction(action_delete)
@@ -810,7 +822,7 @@ class BackupManagerWindow(QDialog):
 
     def get_selected_filename(self) -> Optional[str]:
         selected = self.list_widget.selectedItems()
-        if selected:
+        if selected and selected[0].data(Qt.ItemDataRole.UserRole):
             return selected[0].data(Qt.ItemDataRole.UserRole)
         return None
 
@@ -824,7 +836,6 @@ class BackupManagerWindow(QDialog):
         filename = self.get_selected_filename()
         if not filename: return
 
-        #
         reply = QMessageBox.question(
             self, self.tr("Confirm Deletion"),
             self.tr("Are you sure you want to permanently delete the backup:\n%1?").replace("%1", str(filename)),
@@ -836,11 +847,9 @@ class BackupManagerWindow(QDialog):
                 self.load_backups()
                 self.list_changed_signal.emit()
             else:
-                #
                 QMessageBox.critical(self, self.tr("Error"), self.tr("Failed to delete backup '%1'.").replace("%1", str(filename)))
 
-
-# --- FRONTEND: PyQt6 GUI ---
+# --- FRONTEND: Main Window ---
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -854,9 +863,10 @@ class MainWindow(QMainWindow):
 
         self.worker = None
         self.tray_icon = None
+
         self.create_tray_icon()
 
-        self.DEFAULT_GEOMETRY = QRect(100, 100, 650, 450)
+        self.DEFAULT_GEOMETRY = QRect(100, 100, 650, 600)
 
         self.setup_ui()
         self.setup_shortcuts()
@@ -914,7 +924,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self.tr("Desktop Icon Backup Manager by mapi68"))
         self.setWindowIcon(QIcon(resource_path("icon.ico")))
 
+
         menu_bar = self.menuBar()
+
 
         # File Menu
         #
@@ -938,6 +950,7 @@ class MainWindow(QMainWindow):
         action_exit.setShortcut("Ctrl+Q")
         action_exit.triggered.connect(self.exit_application)
         file_menu.addAction(action_exit)
+
 
         # Settings Menu
         #
@@ -1065,25 +1078,29 @@ class MainWindow(QMainWindow):
 
         self.log_area = QTextEdit()
         self.log_area.setReadOnly(True)
-        self.log_area.setMaximumHeight(200)
+        self.log_area.setMinimumHeight(300)
+        self.log_area.setMaximumHeight(600)
         layout.addWidget(self.log_area)
 
-        #
+        # Horizontal layout to group both elements
+        log_button_layout = QHBoxLayout()
+
+        # Current Resolution Label
+        self.status_label = QLabel(self.tr("Current Resolution: %1").replace("%1", self.current_resolution))
+        log_button_layout.addWidget(self.status_label)
+
+        # Spacer to push the button to the far right
+        log_button_layout.addStretch(1)
+
+        # Clear Log Button
         self.btn_clear_log = QPushButton(self.tr("Clear Log"))
         self.btn_clear_log.clicked.connect(self.log_area.clear)
         self.btn_clear_log.setMaximumWidth(150)
         self.btn_clear_log.setObjectName("clearLogButton")
-
-        log_button_layout = QHBoxLayout()
-        log_button_layout.addStretch(1)
         log_button_layout.addWidget(self.btn_clear_log)
-        layout.addLayout(log_button_layout)
 
-        #
-        self.status_label = QLabel(self.tr("Current Resolution: %1").replace("%1", self.current_resolution))
-        self.statusBar().addWidget(self.status_label)
-        #
-        self.statusBar().showMessage(self.tr("Ready"))
+        # Add the horizontal layout to the main layout
+        layout.addLayout(log_button_layout)
 
         self.setStyleSheet("""
             QPushButton[objectName="saveButton"],
@@ -1256,6 +1273,7 @@ class MainWindow(QMainWindow):
     def start_restore_latest(self):
         latest_backup_file = self.manager.get_latest_backup_filename()
 
+
         if not latest_backup_file:
             #
             QMessageBox.warning(self, self.tr("Error"), self.tr("No backup files found to restore!"))
@@ -1328,6 +1346,7 @@ class MainWindow(QMainWindow):
 
     def on_operation_finished(self, success: bool, saved_metadata: Optional[Dict]):
         mode = self.worker.mode if self.worker else "unknown"
+
 
         if mode == 'restore' and success:
             self._check_display_metadata(saved_metadata)
