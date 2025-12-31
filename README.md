@@ -5,18 +5,18 @@ A powerful Windows application to save and restore your desktop icon positions w
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org)
 [![Windows](https://img.shields.io/badge/Platform-Windows-0078D4?style=flat&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 ![License](https://img.shields.io/badge/license-MIT-green)
-[![GitHub release](https://img.shields.io/github/release/mapi68/DesktopIconBackupManager.svg)](releases)
-[![GitHub release date](https://img.shields.io/github/release-date/mapi68/DesktopIconBackupManager.svg)](releases)
-[![GitHub last commit](https://img.shields.io/github/last-commit/mapi68/DesktopIconBackupManager.svg)](commits/master)
-[![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/DesktopIconBackupManager/total.svg)](releases)
+[![GitHub release](https://img.shields.io/github/release/mapi68/desktop-icon-backup-manager.svg)](releases)
+[![GitHub release date](https://img.shields.io/github/release-date/mapi68/desktop-icon-backup-manager.svg)](releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/mapi68/desktop-icon-backup-manager.svg)](commits/master)
+[![GitHub All Releases](https://img.shields.io/github/downloads/mapi68/desktop-icon-backup-manager/total.svg)](releases)
 ---
 
 ## 📖 Documentation
 
-[![User Manual](https://img.shields.io/badge/manual-PDF-orange.svg?style=for-the-badge&logo=adobeacrobatreader)](https://mapi68.github.io/DesktopIconBackupManager/manual.pdf)
+[![User Manual](https://img.shields.io/badge/manual-PDF-orange.svg?style=for-the-badge&logo=adobeacrobatreader)](https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf)
 
 > [!TIP]
-> You can always access the latest updated documentation at the following link: [User Manual (PDF)](https://mapi68.github.io/DesktopIconBackupManager/manual.pdf)
+> You can always access the latest updated documentation at the following link: [User Manual (PDF)](https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf)
 
 ---
 
@@ -55,15 +55,15 @@ A powerful Windows application to save and restore your desktop icon positions w
 ## 🚀 Installation
 
 ### Option 1: Download Pre-compiled Executable (Recommended)
-1. Download the latest `DesktopIconBackupManager.exe` from the [Releases](../../releases) page
+1. Download the latest `desktop-icon-backup-manager.exe` from the [Releases](../../releases) page
 2. Extract in a folder
 3. Run the executable - no installation required!
 
 ### Option 2: Run from Source
 1. Clone this repository:
    ```bash
-   git clone https://github.com/mapi68/DesktopIconBackupManager.git
-   cd DesktopIconBackupManager
+   git clone https://github.com/mapi68/desktop-icon-backup-manager.git
+   cd desktop-icon-backup-manager
    ```
 
 2. Install dependencies:
@@ -73,7 +73,7 @@ A powerful Windows application to save and restore your desktop icon positions w
 
 3. Run the application:
    ```bash
-   python DesktopIconBackupManager.py
+   python desktop-icon-backup-manager.py
    ```
 
 ### Dependencies

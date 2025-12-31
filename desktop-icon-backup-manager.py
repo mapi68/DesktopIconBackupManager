@@ -1014,7 +1014,7 @@ class MainWindow(QMainWindow):
 
         # Online User Manual
         action_manual = QAction(self.tr("Online User Manual"), self)
-        action_manual.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://mapi68.github.io/DesktopIconBackupManager/manual.pdf")))
+        action_manual.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf")))
         help_menu.addAction(action_manual)
 
         help_menu.addSeparator()

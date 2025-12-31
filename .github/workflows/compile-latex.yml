@@ -18,10 +18,10 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: DesktopIconBackupManager.tex
+          root_file: desktop-icon-backup-manager.tex
 
       - name: Rename PDF to manual.pdf
-        run: mv DesktopIconBackupManager.pdf manual.pdf
+        run: mv desktop-icon-backup-manager.pdf manual.pdf
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

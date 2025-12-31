@@ -54,28 +54,28 @@ jobs:
         run: choco install upx -y
 
       - name: Build EXE
-        run: pyinstaller DesktopIconBackupManager.spec
+        run: pyinstaller desktop-icon-backup-manager.spec
 
       - name: Create artifact folder
         shell: pwsh
         run: |
           mkdir artifact_contents
-          move dist\DesktopIconBackupManager_*.exe artifact_contents/
+          move dist\desktop-icon-backup-manager_*.exe artifact_contents/
 
       - name: Save ZIP artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DesktopIconBackupManager-v${{ steps.app_version.outputs.version }}
+          name: desktop-icon-backup-manager-v${{ steps.app_version.outputs.version }}
           path: artifact_contents/
 
       - name: Create Release ZIP
         shell: pwsh
-        run: Compress-Archive -Path artifact_contents/* -DestinationPath DesktopIconBackupManager.zip
+        run: Compress-Archive -Path artifact_contents/* -DestinationPath desktop-icon-backup-manager.zip
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          files: DesktopIconBackupManager.zip
+          files: desktop-icon-backup-manager.zip
           tag_name: v${{ steps.app_version.outputs.version }}
           name: Release v${{ steps.app_version.outputs.version }}
           draft: false
