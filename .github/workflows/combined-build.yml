@@ -1,0 +1,23 @@
+name: Combined Build and Documentation
+
+on:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  # Job 1: Triggers the Windows EXE build
+  build-executable:
+    uses: ./.github/workflows/build-exe.yml
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+    secrets: inherit
+
+  # Job 2: Triggers the LaTeX compilation and Pages deploy
+  build-documentation:
+    uses: ./.github/workflows/build-pdf-manual.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    secrets: inherit

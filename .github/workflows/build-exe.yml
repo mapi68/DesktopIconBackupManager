@@ -2,6 +2,7 @@ name: Build
 
 on:
   workflow_dispatch:
+  workflow_call: # Required for orchestration
 
 permissions:
   contents: write
