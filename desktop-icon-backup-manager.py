@@ -7,11 +7,12 @@ import win32gui
 import win32con
 import win32api
 import win32process
+import argparse
+import random
+
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple, Optional, Callable, List
-import random
-
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTextEdit, QLabel, QMessageBox,
                              QHBoxLayout, QProgressBar, QDialog, QListWidget,
@@ -1475,15 +1476,71 @@ if __name__ == "__main__":
     if translator.load(QLocale.system(), "", "", resource_path("i18n")):
         app.installTranslator(translator)
 
+    app_path = Path(os.path.abspath(sys.argv[0])).parent
+    settings_file_path = app_path / "settings.ini"
+    settings = QSettings(str(settings_file_path), QSettings.Format.IniFormat)
+
+    parser = argparse.ArgumentParser(
+        description=QCoreApplication.translate("CLI", "Desktop Icon Backup Manager CLI")
+    )
+    parser.add_argument('--backup', action='store_true',
+                        help=QCoreApplication.translate("CLI", "Perform a backup"))
+    parser.add_argument('--restore', type=str, metavar='FILENAME',
+                        help=QCoreApplication.translate("CLI", "Restore a specific backup or 'latest'"))
+    parser.add_argument('--silent', action='store_true',
+                        help=QCoreApplication.translate("CLI", "Run without showing the GUI"))
+
+    args, unknown = parser.parse_known_args()
+
+    if args.silent or args.backup or args.restore:
+        manager = DesktopIconManager()
+        app.setQuitOnLastWindowClosed(True)
+
+        def silent_log(msg):
+            prefix = QCoreApplication.translate("CLI", "[SILENT]")
+            print(f"{prefix} {msg}")
+
+        if args.backup:
+            cleanup_limit = settings.value("cleanup_limit", 0, type=int)
+            print(QCoreApplication.translate("CLI", "Starting silent backup..."))
+
+            success = manager.save(
+                silent_log,
+                description=QCoreApplication.translate("CLI", "Silent CLI Backup"),
+                max_backup_count=cleanup_limit
+            )
+            sys.exit(0 if success else 1)
+
+        elif args.restore:
+            # Legge se lo scaling è abilitato dai settings
+            enable_scaling = settings.value("adaptive_scaling_enabled", False, type=bool)
+
+            filename = None
+            if args.restore.lower() == 'latest':
+                filename = manager.get_latest_backup_filename()
+                if not filename:
+                    print(QCoreApplication.translate("CLI", "Error: No backup files found for latest restore."))
+                    sys.exit(1)
+            else:
+                filename = args.restore
+
+            msg_restore = QCoreApplication.translate("CLI", "Starting silent restore from: %1").replace("%1", filename)
+            print(msg_restore)
+
+            success, _ = manager.restore(silent_log, filename=filename, enable_scaling=enable_scaling)
+            sys.exit(0 if success else 1)
+
+        if args.silent:
+            sys.exit(0)
+
     app.setQuitOnLastWindowClosed(False)
     app.setStyle("Fusion")
 
     try:
         window = MainWindow()
 
-        if window.settings.value("start_minimized", False, type=bool):
+        if settings.value("start_minimized", False, type=bool):
             window.hide()
-            #
             window.tray_icon.showMessage(
                 window.tr("Desktop Icon Manager"),
                 window.tr("Application started minimized to system tray."),
@@ -1495,9 +1552,7 @@ if __name__ == "__main__":
 
         sys.exit(app.exec())
     except Exception as e:
-        #
-        QMessageBox.critical(None, QCoreApplication.translate("Main", "Critical Error"), QCoreApplication.translate("Main", "Failed to start application:\n%1").replace("%1", str(e)))
+        error_title = QCoreApplication.translate("Main", "Critical Error")
+        error_msg = QCoreApplication.translate("Main", "Failed to start application:\n%1").replace("%1", str(e))
+        QMessageBox.critical(None, error_title, error_msg)
         sys.exit(1)
-
-
-

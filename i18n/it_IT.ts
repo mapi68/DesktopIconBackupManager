@@ -4,150 +4,198 @@
     <context>
         <name>BackupManagerWindow</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="633"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="634"/>
             <source>Select, Restore, or Delete Backup</source>
             <translation>Seleziona, Ripristina o Elimina backup</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="640"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="641"/>
             <source>Select a backup to restore or right-click to delete.</source>
             <translation>Seleziona un backup da ripristinare o fai clic con il tasto destro per eliminare.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="644"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="645"/>
             <source>Search by tag, resolution, or date...</source>
             <translation>Ricerca per tag, risoluzione o data...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="655"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="656"/>
             <source>TAG/DESCRIPTION</source>
             <translation>TAG/DESCRIZIONE</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="656"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="657"/>
             <source>RESOLUTION</source>
             <translation>RISOLUZIONE</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="657"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="658"/>
             <source>ICONS</source>
             <translation>ICONE</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="658"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="659"/>
             <source>TIMESTAMP</source>
             <translation>DATA/ORA</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="673"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="674"/>
             <source>Layout Preview:</source>
             <translation>Anteprima layout:</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="765"/>
-            <location filename="..\DesktopIconBackupManager.py" line="678"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="766"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="679"/>
             <source>Select a backup to see details.</source>
             <translation>Seleziona un backup per vedere i dettagli.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="689"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="690"/>
             <source>Restore Selected Layout</source>
             <translation>Ripristina layout selezionato</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="694"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="695"/>
             <source>Close</source>
             <translation>Chiudi</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="716"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="717"/>
             <source>No backups found.</source>
             <translation>Nessun backup trovato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="781"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="782"/>
             <source>None</source>
             <translation>Nessuno</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="784"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="785"/>
             <source>File</source>
             <translation>File</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="785"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="786"/>
             <source>Icons</source>
             <translation>Icone</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="786"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="787"/>
             <source>Resolution</source>
             <translation>Risoluzione</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="787"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="788"/>
             <source>Description</source>
             <translation>Descrizione</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="788"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="789"/>
             <source>Timestamp</source>
             <translation>Timestamp</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="794"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="795"/>
             <source>Error loading backup:
 %1</source>
             <translation>Errore durante il caricamento del backup:
 %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="811"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="812"/>
             <source>Restore Selected</source>
             <translation>Ripristina selezionato</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="817"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="818"/>
             <source>Delete Selected</source>
             <translation>Elimina selezionato</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="840"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="841"/>
             <source>Confirm Deletion</source>
             <translation>Conferma eliminazione</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="841"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="842"/>
             <source>Are you sure you want to permanently delete the backup:
 %1?</source>
             <translation>Sei sicuro di voler eliminare definitivamente il backup:
 %1?</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="850"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="851"/>
             <source>Error</source>
             <translation>Errore</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="850"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="851"/>
             <source>Failed to delete backup '%1'.</source>
             <translation>Impossibile eliminare il backup '%1'.</translation>
         </message>
     </context>
     <context>
+        <name>CLI</name>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1484"/>
+            <source>Desktop Icon Backup Manager CLI</source>
+            <translation>Desktop Icon Backup Manager CLI</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1487"/>
+            <source>Perform a backup</source>
+            <translation>Esegui un backup</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1489"/>
+            <source>Restore a specific backup or 'latest'</source>
+            <translation>Ripristina un backup specifico o il più recente</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1491"/>
+            <source>Run without showing the GUI</source>
+            <translation>Esegui senza mostrare la GUI</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1500"/>
+            <source>[SILENT]</source>
+            <translation>[SILENZIOSO]</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1505"/>
+            <source>Starting silent backup...</source>
+            <translation>Avvio backup silenzioso...</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1509"/>
+            <source>Silent CLI Backup</source>
+            <translation>Backup CLI silenzioso</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1522"/>
+            <source>Error: No backup files found for latest restore.</source>
+            <translation>Errore: nessun file di backup trovato per ripristinare l'ultimo.</translation>
+        </message>
+        <message>
+            <location filename="..\desktop-icon-backup-manager.py" line="1527"/>
+            <source>Starting silent restore from: %1</source>
+            <translation>Avvio del ripristino silenzioso da: %1</translation>
+        </message>
+    </context>
+    <context>
         <name>DesktopIconManager</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="202"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="203"/>
             <source>Unable to find desktop ListView control. Make sure desktop icons are visible.</source>
             <translation>Impossibile trovare il controllo ListView del desktop. Assicurati che le icone del desktop siano visibili.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="234"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="235"/>
             <source>No backup files found to delete.</source>
             <translation>Nessun file di backup trovato da eliminare.</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="247"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="248"/>
             <source>✓ Successfully deleted %n backup file(s).</source>
             <translation>
                 <numerusform>✓ %n file di backup eliminato con successo.</numerusform>
@@ -155,7 +203,7 @@
             </translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="250"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="251"/>
             <source>✗ Failed to delete %n backup file(s).</source>
             <translation>
                 <numerusform>✗ Errore durante l'eliminazione di %n file di backup.</numerusform>
@@ -163,12 +211,12 @@
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="257"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="258"/>
             <source>Automatic cleanup skipped: max_count is disabled (0).</source>
             <translation>Pulizia automatica saltata: limite disabilitato (0).</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="265"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="266"/>
             <source>Cleanup skipped: Current count (%n) is within the limit (%1).</source>
             <translation>
                 <numerusform>Pulizia saltata: il conteggio attuale (%n) è entro il limite (%1).</numerusform>
@@ -176,7 +224,7 @@
             </translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="272"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="273"/>
             <source>Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %n oldest file(s).</source>
             <translation>
                 <numerusform>Pulizia necessaria: il conteggio attuale (%1) supera il limite (%2). Eliminazione del file più vecchio.</numerusform>
@@ -184,140 +232,140 @@
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="278"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="279"/>
             <source>  Deleted oldest backup: %1</source>
             <translation>  Eliminato il backup più vecchio: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="281"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="282"/>
             <source>  Failed to delete: %1</source>
             <translation>  Impossibile eliminare: %1</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="284"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="285"/>
             <source>Cleanup complete. Total deleted: %n file(s).</source>
             <translation>
-                <numerusform>Pulizia completata. Totale eliminati: %n file.</numerusform>
+                <numerusform>Pulizia completata. Totale eliminato: %n file.</numerusform>
                 <numerusform>Pulizia completata. Totale eliminati: %n file.</numerusform>
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="317"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="318"/>
             <source>Monitor Resolution: %1</source>
             <translation>Risoluzione monitor: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="318"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="319"/>
             <source>Found %1 icons. Starting scan...</source>
             <translation>Trovate %1 icone. Avvio scansione...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="352"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="353"/>
             <source>✓ Saved %1 icons to backup file '%2'</source>
             <translation>✓ Salvate %1 icone nel file di backup '%2'</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="355"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="356"/>
             <source>  (Description: %1)</source>
             <translation>  (Descrizione: %1)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="365"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="366"/>
             <source>✗ Error saving: %1</source>
             <translation>✗ Errore durante il salvataggio: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="385"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="386"/>
             <source>✗ Error: Backup file not found.</source>
             <translation>✗ Errore: file di backup non trovato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="391"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="392"/>
             <source>Attempting to restore from backup: '%1'</source>
             <translation>Tentativo di ripristino dal backup: '%1'</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="392"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="393"/>
             <source>Saved Resolution (from filename): %1</source>
             <translation>Risoluzione salvata (dal nome file): %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="406"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="407"/>
             <source>Restoring layout (saved: %1)</source>
             <translation>Ripristino layout (salvato: %1)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="407"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="408"/>
             <source>  Description: %1</source>
             <translation>  Descrizione: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="411"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="412"/>
             <source>Restoring layout (Old format, no timestamp/metadata)</source>
             <translation>Ripristino layout (vecchio formato, senza timestamp/metadati)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="415"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="416"/>
             <source>✗ Error: Invalid backup file format: %1</source>
             <translation>✗ Errore: formato del file di backup non valido: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="434"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="435"/>
             <source>✓ Adaptive Scaling enabled: Saved %1x%2 -> Current %3x%4</source>
             <translation>✓ Ridimensionamento adattivo abilitato: Salvato %1x%2 -> Attuale %3x%4</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="435"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="436"/>
             <source>  **[SCALING APPLIED]** Scaling factors: X=%1, Y=%2</source>
             <translation>  **[APPLICATO RIDIMENSIONAMENTO]** Fattori di ridimensionamento: X=%1, Y=%2</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="439"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="440"/>
             <source>Adaptive Scaling enabled, but resolutions match or are invalid. Scaling skipped.</source>
             <translation>Ridimensionamento adattivo abilitato, ma le risoluzioni coincidono o non sono valide. Ridimensionamento saltato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="442"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="443"/>
             <source>Adaptive Scaling is disabled. Restoring raw coordinates.</source>
             <translation>Il ridimensionamento adattivo è disabilitato. Ripristino delle coordinate grezze.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="458"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="459"/>
             <source>Restoring positions for %1 saved icons...</source>
             <translation>Ripristino posizioni per %1 icone salvate...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="500"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="501"/>
             <source>✓ Restored %1 icons</source>
             <translation>✓ Ripristinate %1 icone</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="503"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="504"/>
             <source>⚠ Skipped %1 icons (not found on desktop)</source>
             <translation>⚠ %1 icone saltate (non trovate sul desktop)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="511"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="512"/>
             <source>✗ Error restoring: %1</source>
             <translation>✗ Errore durante il ripristino: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="528"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="529"/>
             <source>Redrawing disabled for scrambling...</source>
             <translation>Ridisegno disabilitato per il rimescolamento...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="531"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="532"/>
             <source>Found %1 icons. Starting random positioning...</source>
             <translation>Trovate %1 icone. Avvio posizionamento casuale...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="544"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="545"/>
             <source>✓ Scrambled positions for %1 icons.</source>
             <translation>✓ Posizioni rimescolate per %1 icone.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="552"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="553"/>
             <source>✗ Error scrambling icons: %1</source>
             <translation>✗ Errore durante il rimescolamento delle icone: %1</translation>
         </message>
@@ -325,7 +373,7 @@
     <context>
         <name>IconPreviewWidget</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="159"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="160"/>
             <source>No Preview Available</source>
             <translation>Anteprima non disponibile</translation>
         </message>
@@ -333,32 +381,32 @@
     <context>
         <name>IconWorker</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="597"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="598"/>
             <source>Performing mandatory quick backup before scrambling...</source>
             <translation>Esecuzione backup rapido obbligatorio prima del rimescolamento...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="600"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="601"/>
             <source>  [Pre-Scramble Backup] %1</source>
             <translation>  [Backup pre-rimescolamento] %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="603"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="604"/>
             <source>Auto-Backup before Scramble (Random)</source>
             <translation>Backup automatico prima del rimescolamento (casuale)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="608"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="609"/>
             <source>Pre-scramble backup completed successfully. Starting scramble...</source>
             <translation>Backup pre-rimescolamento completato. Avvio rimescolamento...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="615"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="616"/>
             <source>✗ Pre-scramble backup failed. Aborting scramble operation.</source>
             <translation>✗ Backup pre-rimescolamento non riuscito. Operazione annullata.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="620"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="621"/>
             <source>✗ CRITICAL ERROR: %1</source>
             <translation>✗ ERRORE CRITICO: %1</translation>
         </message>
@@ -366,223 +414,223 @@
     <context>
         <name>Main</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1499"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1555"/>
             <source>Critical Error</source>
             <translation>Errore critico</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1499"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1556"/>
             <source>Failed to start application:
 %1</source>
-            <translation>Impossibile avviare l'applicazione:
+            <translation>Impossibile avviare l'applicazione: 
 %1</translation>
         </message>
     </context>
     <context>
         <name>MainWindow</name>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="858"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="859"/>
             <source>Unknown</source>
             <translation>Sconosciuto</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="885"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="886"/>
             <source>Quick Save</source>
             <translation>Salvataggio rapido</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="886"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="887"/>
             <source>Quick Save (Tray)</source>
             <translation>Salvataggio rapido (tray)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="890"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="891"/>
             <source>Restore Latest</source>
             <translation>Ripristina ultimo</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="897"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="898"/>
             <source>Show Window</source>
             <translation>Mostra finestra</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="902"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="903"/>
             <source>Exit</source>
             <translation>Esci</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="924"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="925"/>
             <source>Desktop Icon Backup Manager by mapi68</source>
             <translation>Desktop Icon Backup Manager di mapi68</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="933"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="934"/>
             <source>&amp;File</source>
             <translation>&amp;File</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="936"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="937"/>
             <source>Scramble Desktop Icons (Random)</source>
             <translation>Rimescola icone desktop (casuale)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="937"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="938"/>
             <source>Randomizes the position of all desktop icons after creating a mandatory backup.</source>
             <translation>Posiziona casualmente tutte le icone del desktop dopo aver creato un backup obbligatorio.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="943"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="944"/>
             <source>Remove All Backups...</source>
             <translation>Rimuovi tutti i backup...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="949"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="950"/>
             <source>E&amp;xit</source>
             <translation>E&amp;sci</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="957"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="958"/>
             <source>&amp;Settings</source>
             <translation>&amp;Impostazioni</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="960"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="961"/>
             <source>Start Minimized to Tray</source>
             <translation>Avvia ridotto nella tray</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1436"/>
-            <location filename="..\DesktopIconBackupManager.py" line="967"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1437"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="968"/>
             <source>Auto-Save on Exit</source>
             <translation>Salvataggio automatico all'uscita</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="972"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="973"/>
             <source>Auto-Restore on Startup</source>
             <translation>Ripristino automatico all'avvio</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="979"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="980"/>
             <source>Enable Adaptive Scaling on Restore</source>
             <translation>Abilita ridimensionamento adattivo al ripristino</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="986"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="987"/>
             <source>Minimize to Tray on Close ('X' button)</source>
             <translation>Minimizza nella tray alla chiusura (pulsante 'X')</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="993"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="994"/>
             <source>Automatic Backup Cleanup Limit</source>
             <translation>Limite di pulizia automatica del backup</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="999"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1000"/>
             <source>Disabled (Keep All)</source>
             <translation>Disabilitato (mantieni tutti)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1000"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1001"/>
             <source>Keep Last 5</source>
             <translation>Mantieni ultimi 5</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1001"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1002"/>
             <source>Keep Last 10</source>
             <translation>Mantieni ultimi 10</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1002"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1003"/>
             <source>Keep Last 25</source>
             <translation>Mantieni ultimi 25</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1003"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1004"/>
             <source>Keep Last 50</source>
             <translation>Mantieni ultimi 50</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1013"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1014"/>
             <source>&amp;Help</source>
             <translation>&amp;Aiuto</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1016"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1017"/>
             <source>Online User Manual</source>
             <translation>Manuale utente online</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1023"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1024"/>
             <source>&amp;About</source>
             <translation>&amp;Informazioni</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1038"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1039"/>
             <source>Optional: Enter a descriptive tag/description...</source>
             <translation>Opzionale: inserisci un tag o descrizione...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1042"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1043"/>
             <source>Save Tag:</source>
             <translation>Tag di salvataggio:</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1050"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1051"/>
             <source>💾 SAVE QUICK BACKUP</source>
             <translation>💾 SALVATAGGIO RAPIDO</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1052"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1053"/>
             <source>Save current desktop icon positions to a new file, using the tag above.</source>
             <translation>Salva le posizioni correnti delle icone del desktop in un nuovo file, utilizzando il tag sopra indicato</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1057"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1058"/>
             <source>↺ RESTORE LATEST</source>
             <translation>↺ RIPRISTINA ULTIMO</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1059"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1060"/>
             <source>Restore icon positions from the LATEST backup file found.</source>
             <translation>Ripristina le posizioni dall'ULTIMO file di backup trovato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1064"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1065"/>
             <source>↺ BACKUP MANAGER</source>
             <translation>↺ GESTORE BACKUP</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1066"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1067"/>
             <source>Opens a window to select a specific backup file to restore or delete.</source>
             <translation>Apre una finestra per selezionare un backup specifico da ripristinare o eliminare.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1077"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1078"/>
             <source>Activity Log:</source>
             <translation>Log attività:</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1089"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1090"/>
             <source>Current Resolution: %1</source>
             <translation>Risoluzione attuale: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1096"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1097"/>
             <source>Clear Log</source>
             <translation>Pulisci log</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1128"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1129"/>
             <source>Save</source>
             <translation>Salva</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1131"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1132"/>
             <source>Quick Backup (Shortcut)</source>
             <translation>Backup rapido (scorciatoia)</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="1151"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1152"/>
             <source>Automatic cleanup limit set to: %n backup(s) (0 = Disabled).</source>
             <translation>
                 <numerusform>Limite pulizia automatica impostato a: %n backup (0 = Disabilitato).</numerusform>
@@ -590,54 +638,54 @@
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1450"/>
-            <location filename="..\DesktopIconBackupManager.py" line="1378"/>
-            <location filename="..\DesktopIconBackupManager.py" line="1163"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1451"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1379"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1164"/>
             <source>Desktop Icon Manager</source>
             <translation>Desktop Icon Manager</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1189"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1190"/>
             <source>Backup list updated (item deleted).</source>
             <translation>Lista backup aggiornata (elemento eliminato).</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1195"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1196"/>
             <source>Quick Backup</source>
             <translation>Backup rapido</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1205"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1206"/>
             <source>About Desktop Icon Backup Manager</source>
             <translation>Informazioni su Desktop Icon Backup Manager</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1206"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1207"/>
             <source>&lt;h2>Desktop Icon Backup Manager&lt;/h2>&lt;p>A simple yet powerful tool to save and restore Windows desktop icon positions.&lt;/p>&lt;h3>Key Features:&lt;/h3>&lt;ul>&lt;li>**Quick Save:** Save icons with an optional descriptive tag.&lt;/li>&lt;li>**Backup Management:** Select, restore, or delete specific backups.&lt;/li>&lt;li>**Visual Preview:** See a mini-map of your layout.&lt;/li>&lt;li>**Adaptive Scaling:** Automatic adjustment for different resolutions.&lt;/li>&lt;li>**Automatic Cleanup:** Set a limit on backups to keep.&lt;/li>&lt;li>**Random Scramble:** Randomize icon positions after backup.&lt;/li>&lt;li>**Tray Integration:** Quick access via system tray.&lt;/li>&lt;/ul>&lt;p>&lt;b>Version:&lt;/b> %1&lt;/p>&lt;p>Developed by: &lt;b>mapi68&lt;/b>&lt;/p></source>
             <translation>&lt;h2>Desktop Icon Backup Manager&lt;/h2>&lt;p>Uno strumento semplice ma potente per salvare e ripristinare le posizioni delle icone sul desktop di Windows.&lt;/p>&lt;h3>Funzioni principali:&lt;/h3>&lt;ul>&lt;li>**Salvataggio Rapido:** Salva le icone con un tag descrittivo opzionale.&lt;/li>&lt;li>**Gestione Backup:** Seleziona, ripristina o elimina backup specifici.&lt;/li>&lt;li>**Anteprima Visiva:** Visualizza una mini-mappa del tuo layout.&lt;/li>&lt;li>**Ridimensionamento Adattivo:** Regolazione automatica per diverse risoluzioni.&lt;/li>&lt;li>**Pulizia Automatica:** Imposta un limite ai backup da conservare.&lt;/li>&lt;li>**Rimescolamento Casuale:** Posizioni casuali dopo il backup.&lt;/li>&lt;li>**Integrazione Tray:** Accesso rapido tramite la barra di sistema.&lt;/li>&lt;/ul>&lt;p>&lt;b>Versione:&lt;/b> %1&lt;/p>&lt;p>Sviluppato da: &lt;b>mapi68&lt;/b>&lt;/p></translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1227"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1228"/>
             <source>No backup files found to delete.</source>
             <translation>Nessun file di backup trovato da eliminare.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1228"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1229"/>
             <source>No Backups Found</source>
             <translation>Nessun backup trovato</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1228"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1229"/>
             <source>There are no backup files to delete.</source>
             <translation>Non ci sono file di backup da eliminare.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1233"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1234"/>
             <source>WARNING: Delete All Backups</source>
             <translation>ATTENZIONE: elimina tutti i backup</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="1234"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1235"/>
             <source>Are you absolutely sure you want to permanently delete ALL %n desktop icon backup file(s)?
 
 This action cannot be undone!</source>
@@ -651,65 +699,65 @@ Questa azione non può essere annullata!</numerusform>
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1241"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1242"/>
             <source>Starting deletion of all backup files...</source>
             <translation>Avvio eliminazione di tutti i file di backup...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1375"/>
-            <location filename="..\DesktopIconBackupManager.py" line="1248"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1376"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1249"/>
             <source>Success</source>
             <translation>Successo</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1248"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1249"/>
             <source>All backup files have been successfully deleted.</source>
             <translation>Tutti i file di backup sono stati eliminati con successo.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1383"/>
-            <location filename="..\DesktopIconBackupManager.py" line="1279"/>
-            <location filename="..\DesktopIconBackupManager.py" line="1251"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1384"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1280"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1252"/>
             <source>Error</source>
             <translation>Errore</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1251"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1252"/>
             <source>Some files could not be deleted. Check the Activity Log for details.</source>
             <translation>Alcuni file non sono stati eliminati. Controlla il Log attività per i dettagli.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1257"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1258"/>
             <source>Starting new timestamped backup...</source>
             <translation>Avvio di un nuovo backup con timestamp...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1260"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1261"/>
             <source>  (Tag: %1)</source>
             <translation>  (Tag: %1)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1265"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1266"/>
             <source>Saving...</source>
             <translation>Salvataggio in corso...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1279"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1280"/>
             <source>No backup files found to restore!</source>
             <translation>Nessun file di backup trovato per il ripristino!</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1280"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1281"/>
             <source>✗ Restore failed: No backup files found.</source>
             <translation>✗ Ripristino non riuscito: nessun file di backup trovato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1300"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1301"/>
             <source>Confirm Restore</source>
             <translation>Conferma ripristino</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1301"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1302"/>
             <source>Restore icon positions from the LATEST backup file:
 
 File: %1
@@ -730,27 +778,27 @@ Data/Ora: %5
 Sei sicuro di voler procedere?</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1313"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1314"/>
             <source>Starting restore from backup '%1'...</source>
             <translation>Avvio ripristino dal backup '%1'...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1313"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1314"/>
             <source>latest</source>
             <translation>ultimo</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1317"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1318"/>
             <source>Restoring...</source>
             <translation>Ripristino in corso...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1328"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1329"/>
             <source>Confirm Scramble</source>
             <translation>Conferma rimescolamento</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1329"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1330"/>
             <source>Are you sure you want to randomize the positions of ALL desktop icons?
 
 **A mandatory backup will be created first**.
@@ -763,62 +811,62 @@ Do you want to proceed?</source>
 Vuoi procedere?</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1335"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1336"/>
             <source>Starting desktop icon scrambling (randomization)...</source>
             <translation>Avvio rimescolamento icone desktop (randomizzazione)...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1339"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1340"/>
             <source>Scrambling icons...</source>
             <translation>Rimescolamento icone...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1356"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1357"/>
             <source>Forcing desktop refresh...</source>
             <translation>Forzatura aggiornamento desktop.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1362"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1363"/>
             <source>Desktop refresh signal sent successfully.</source>
             <translation>Segnale di aggiornamento desktop inviato con successo.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1365"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1366"/>
             <source>Warning: Failed to send desktop refresh signals: %1</source>
             <translation>Avviso: impossibile inviare segnali di aggiornamento desktop: %1</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1372"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1373"/>
             <source>Operation completed successfully</source>
             <translation>Operazione completata con successo</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1375"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1376"/>
             <source>Operation completed successfully! (%1)</source>
             <translation>Operazione completata con successo! (%1)</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1378"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1379"/>
             <source>%1 successful!</source>
             <translation>%1 riuscito!</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1381"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1382"/>
             <source>Operation failed</source>
             <translation>Operazione non riuscita</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1383"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1384"/>
             <source>Operation failed (%1). Check the log for details.</source>
             <translation>Operazione non riuscita (%1). Controlla il log per i dettagli.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1394"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1395"/>
             <source>⚠ Warning: Display metadata missing or incomplete.</source>
             <translation>⚠ Avviso: metadati del display mancanti o incompleti.</translation>
         </message>
         <message numerus="yes">
-            <location filename="..\DesktopIconBackupManager.py" line="1399"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1400"/>
             <source>⚠ Warning: Saved (%n monitor(s)) vs Current (%1 monitor(s)).</source>
             <translation>
                 <numerusform>⚠ Attenzione: salvato %n monitor rispetto ai %1 attuali</numerusform>
@@ -826,12 +874,12 @@ Vuoi procedere?</translation>
             </translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1401"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1402"/>
             <source>Monitor Mismatch Warning</source>
             <translation>Avviso discrepanza monitor</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1402"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1403"/>
             <source>The layout was saved with %1 monitor(s), but you currently have %2 monitor(s) connected.
 
 Icon positions have been restored, but they may be inaccurate.</source>
@@ -840,17 +888,17 @@ Icon positions have been restored, but they may be inaccurate.</source>
 Le posizioni sono state ripristinate, ma potrebbero non essere accurate.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1419"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1420"/>
             <source>⚠ Warning: Screen resolutions do not match the saved layout.</source>
             <translation>⚠ Avviso: le risoluzioni dello schermo non corrispondono al layout salvato.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1421"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1422"/>
             <source>Resolution Mismatch Warning</source>
             <translation>Avviso discrepanza risoluzione</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1422"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1423"/>
             <source>The screen resolutions for one or more monitors do not match the saved layout.
 
 Icon positions have been restored, but they may be inaccurate.</source>
@@ -859,12 +907,12 @@ Icon positions have been restored, but they may be inaccurate.</source>
 Le posizioni delle icone sono state ripristinate, ma potrebbero non essere accurate.</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1431"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1432"/>
             <source>Auto-Save on Exit enabled. Performing silent backup...</source>
             <translation>Salvataggio automatico all'uscita abilitato. Esecuzione backup silenzioso...</translation>
         </message>
         <message>
-            <location filename="..\DesktopIconBackupManager.py" line="1451"/>
+            <location filename="..\desktop-icon-backup-manager.py" line="1452"/>
             <source>Application minimized to system tray. Click or double-click to restore.</source>
             <translation>Applicazione ridotta nella barra di sistema. Fai clic o doppio clic per ripristinare.</translation>
         </message>

@@ -787,9 +787,9 @@ The program displays system tray notifications for important events:
 \hline
 \textbf{Shortcut} & \textbf{Action} & \textbf{Description} \\
 \hline
-\texttt{Ctrl+S} & Quick Save & Saves current layout with optional tag from input field \\
+\texttt{Ctrl+S} & Quick Save & Saves current layout with optional tag \\
 \hline
-\texttt{Ctrl+Q} & Exit Application & Closes program completely, respects Auto-Save setting \\
+\texttt{Ctrl+Q} & Exit Application & Closes program completely \\
 \hline
 \end{tabular}
 \caption{Available keyboard shortcuts}
@@ -842,7 +842,7 @@ Displays program information including:
     \item Navigate to \texttt{View > Show desktop icons}
     \item Verify checkmark appears next to "Show desktop icons"
     \item Restart the program
-    \item If error persists, check Windows Explorer is running (Ctrl+Shift+Esc, look for explorer.exe)
+    \item If error persists, check Windows Explorer is running
 \end{enumerate}
 
 \textbf{Advanced Troubleshooting}:
@@ -1379,12 +1379,37 @@ cleanup_limit=10
 
 \subsection{Command Line Arguments}
 
-Currently, the program does not support command-line arguments. Future versions may include:
-\begin{itemize}
-    \item Silent backup mode: \texttt{--backup --silent}
-    \item Silent restore mode: \texttt{--restore latest --silent}
-    \item Specify backup file: \texttt{--restore "filename.json"}
+The application supports command-line arguments for automation and scripting. When any CLI argument is used, the program operates in a "headless" mode, meaning the graphical user interface (GUI) will not be initialized, and the process will exit immediately after completion.
+
+\begin{itemize} \item \textbf{Silent Backup}: \texttt{--backup --silent} \ Performs a backup using the settings defined in \texttt{settings.ini} (e.g., respecting the maximum backup count).
+
+\item \textbf{Silent Restore (Latest)}:
+\texttt{--restore latest --silent} \\
+Automatically restores the most recent backup available in the backup directory.
+
+\item \textbf{Specify Backup File}:
+\texttt{--restore "filename.json" --silent} \\
+Restores desktop icon positions from a specific JSON file.
 \end{itemize}
+
+\subsection{Technical Implementation Details}
+
+The CLI integration is designed to be fully compatible with the existing infrastructure:
+
+\begin{itemize} \item \textbf{Configuration Inheritance}: The CLI mode automatically loads the \texttt{settings.ini} file. This ensures that features like \textit{Adaptive Scaling} and \textit{Cleanup Limits} are applied even when running without a GUI.
+
+\item \textbf{Exit Codes}:
+\begin{itemize}
+    \item \texttt{0}: Operation completed successfully.
+    \item \texttt{1}: An error occurred (e.g., file not found or permission denied).
+\end{itemize}
+\end{itemize}
+
+\subsection{Example Batch Script}
+
+You can create a \texttt{.bat} file to automate your backup on Windows startup or via Task Scheduler:
+
+\begin{verbatim} @echo off start "" "desktop-icon-backup-manager.exe" --backup --silent \end{verbatim}
 
 \subsection{Automation with Task Scheduler}
 
@@ -1518,7 +1543,7 @@ To read icon positions, the program:
 \section{License and Credits}
 
 \subsection{Developer}
-\textbf{mapi68}
+\textbf{mapi*68}
 
 \subsection{Libraries Used}
 \begin{itemize}
