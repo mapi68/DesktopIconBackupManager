@@ -17,10 +17,10 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTextEdit, QLabel, QMessageBox,
                              QHBoxLayout, QProgressBar, QDialog, QListWidget,
                              QListWidgetItem, QAbstractItemView, QMenu, QLineEdit,
-                             QSystemTrayIcon)
+                             QSystemTrayIcon, QToolTip)
 from PyQt6.QtCore import (Qt, QThread, pyqtSignal, QTimer, QSettings,
                           QSize, QStandardPaths, QCoreApplication, QRect, QPoint,
-                          QTranslator, QLocale, QUrl) # Added QUrl
+                          QTranslator, QLocale, QUrl, QEvent)
 from PyQt6.QtGui import (QAction, QKeySequence, QGuiApplication, QIcon, QPainter,
                          QColor, QPen, QDesktopServices)
 
@@ -55,7 +55,7 @@ def resource_path(relative_path: str) -> str:
 # --- WIN32 CONSTANTS ---
 class Win32Constants:
     LVM_GETITEMCOUNT = 0x1004
-    LVM_GETITEMTEXT = 0x102D
+    LVM_GETITEMTEXTW = 0x1073
     LVM_GETITEMPOSITION = 0x1010
     LVM_SETITEMPOSITION = 0x100F
     MEM_COMMIT = 0x1000
@@ -67,7 +67,18 @@ class Win32Constants:
 REMOTE_BUFFER_SIZE = 4096
 TEXT_BUFFER_OFFSET = 256
 TEXT_BUFFER_SIZE = 2048
-LVITEM_FORMAT = 'IIIIIQI'
+class LVITEMW(ctypes.Structure):
+    _fields_ = [
+        ("mask", ctypes.c_uint),
+        ("iItem", ctypes.c_int),
+        ("iSubItem", ctypes.c_int),
+        ("state", ctypes.c_uint),
+        ("stateMask", ctypes.c_uint),
+        ("pszText", ctypes.c_void_p),
+        ("cchTextMax", ctypes.c_int),
+        ("iImage", ctypes.c_int),
+        ("lParam", ctypes.c_void_p)
+    ]
 BACKUP_DIR = "icon_backups"
 
 # --- HELPER FUNCTIONS ---
@@ -262,7 +273,6 @@ class DesktopIconManager:
         files_to_delete = backup_files[max_count:]
         deleted_count = 0
 
-        #
         log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup needed: Current count (%1) exceeds limit (%2). Deleting %n oldest file(s).", None, len(files_to_delete)).replace("%1", str(current_count)).replace("%2", str(max_count)))
 
         for filename in files_to_delete:
@@ -272,7 +282,6 @@ class DesktopIconManager:
             else:
                 log_callback(QCoreApplication.translate("DesktopIconManager", "  Failed to delete: %1").replace("%1", str(filename)))
 
-        #
         log_callback(QCoreApplication.translate("DesktopIconManager", "Cleanup complete. Total deleted: %n file(s).", None, deleted_count))
 
     def _get_latest_backup_path(self) -> Optional[str]:
@@ -282,217 +291,212 @@ class DesktopIconManager:
         return None
 
     def save(self, log_callback: Callable[[str], None],
-             progress_callback: Optional[Callable[[int], None]] = None,
-             description: Optional[str] = None,
-             max_backup_count: int = 0) -> bool:
+                 progress_callback: Optional[Callable[[int], None]] = None,
+                 description: Optional[str] = None,
+                 max_backup_count: int = 0) -> bool:
 
-        display_metadata = get_display_metadata()
-        resolution = display_metadata.get("primary_resolution", "UnknownResolution")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            display_metadata = get_display_metadata()
+            resolution = display_metadata.get("primary_resolution", "UnknownResolution")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        filename = f"{resolution}_{timestamp}.json"
-        filepath = os.path.join(BACKUP_DIR, filename)
+            filename = f"{resolution}_{timestamp}.json"
+            filepath = os.path.join(BACKUP_DIR, filename)
 
-        icons = {}
-        pid = win32process.GetWindowThreadProcessId(self.hwnd_listview)[1]
-        process_handle = None
-        remote_memory = None
+            icons = {}  # Dizionario che conterrà i dati
+            pid = win32process.GetWindowThreadProcessId(self.hwnd_listview)[1]
+            process_handle = None
+            remote_memory = None
 
-        try:
-            process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, pid)
-            remote_memory = win32process.VirtualAllocEx(
-                process_handle, 0, REMOTE_BUFFER_SIZE, Win32Constants.MEM_COMMIT, Win32Constants.PAGE_READWRITE
-            )
-
-            count = win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMCOUNT, 0, 0)
-            log_callback(QCoreApplication.translate("DesktopIconManager", "Monitor Resolution: %1").replace("%1", str(resolution)))
-            log_callback(QCoreApplication.translate("DesktopIconManager", "Found %1 icons. Starting scan...").replace("%1", str(count)))
-
-            for i in range(count):
-                if progress_callback:
-                    progress_callback(int((i / count) * 100))
-
-                win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMPOSITION, i, remote_memory)
-                point_data = win32process.ReadProcessMemory(process_handle, remote_memory, 8)
-                x, y = struct.unpack('ii', point_data)
-
-                text_buffer_remote = remote_memory + TEXT_BUFFER_OFFSET
-                lvitem_data = struct.pack(
-                    LVITEM_FORMAT, 0x0001, i, 0, 0, 0, text_buffer_remote, 512
+            try:
+                process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, pid)
+                remote_memory = win32process.VirtualAllocEx(
+                    process_handle, 0, REMOTE_BUFFER_SIZE, Win32Constants.MEM_COMMIT, Win32Constants.PAGE_READWRITE
                 )
-                win32process.WriteProcessMemory(process_handle, remote_memory, lvitem_data)
-                win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMTEXT, i, remote_memory)
-                text_raw = win32process.ReadProcessMemory(process_handle, text_buffer_remote, TEXT_BUFFER_SIZE)
-                icon_name = text_raw.decode('utf-16-le', errors='ignore').split('\x00')[0]
 
-                if icon_name:
-                    icons[icon_name] = (x, y)
+                count = win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMCOUNT, 0, 0)
+                log_callback(QCoreApplication.translate("DesktopIconManager", "Monitor Resolution: %1").replace("%1", str(resolution)))
+                log_callback(QCoreApplication.translate("DesktopIconManager", "Found %1 icons. Starting scan...").replace("%1", str(count)))
 
-            profile_data = {
-                "timestamp": datetime.now().isoformat(),
-                "icon_count": len(icons),
-                "description": description if description else "",
-                "display_metadata": display_metadata,
-                "icons": icons
-            }
+                for i in range(count):
+                    if progress_callback:
+                        progress_callback(int((i / count) * 100))
 
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(profile_data, f, indent=4)
+                    win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMPOSITION, i, remote_memory)
+                    point_data = win32process.ReadProcessMemory(process_handle, remote_memory, 8)
+                    x, y = struct.unpack('ii', point_data)
 
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Saved %1 icons to backup file '%2'").replace("%1", str(len(icons))).replace("%2", str(filename)))
-            if description:
-                log_callback(QCoreApplication.translate("DesktopIconManager", "  (Description: %1)").replace("%1", str(description)))
+                    text_buffer_remote = remote_memory + TEXT_BUFFER_OFFSET
+                    lvitem = LVITEMW()
+                    lvitem.mask = 0x0001
+                    lvitem.iItem = i
+                    lvitem.iSubItem = 0
+                    lvitem.pszText = text_buffer_remote
+                    lvitem.cchTextMax = 512
 
-            self.cleanup_old_backups(max_backup_count, log_callback)
+                    win32process.WriteProcessMemory(process_handle, remote_memory, bytes(lvitem))
+                    win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMTEXTW, i, remote_memory)
+                    text_raw = win32process.ReadProcessMemory(process_handle, text_buffer_remote, 512 * 2)
+                    full_text = text_raw.decode("utf-16-le")
+                    icon_name = full_text.split('\0', 1)[0]
 
-            if progress_callback:
-                progress_callback(100)
-            return True
+                    if icon_name:
+                        icons[icon_name] = (x, y)
 
-        except Exception as e:
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error saving: %1").replace("%1", str(str(e))))
-            return False
-        finally:
-            if remote_memory and process_handle:
-                win32process.VirtualFreeEx(process_handle, remote_memory, 0, Win32Constants.MEM_RELEASE)
-            if process_handle:
-                win32api.CloseHandle(process_handle)
+                profile_data = {
+                    "timestamp": datetime.now().isoformat(),
+                    "icon_count": len(icons),
+                    "description": description if description else "",
+                    "display_metadata": display_metadata,
+                    "icons": icons
+                }
+
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(profile_data, f, indent=4, ensure_ascii=False)
+
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Saved %1 icons to backup file '%2'").replace("%1", str(len(icons))).replace("%2", str(filename)))
+
+                if description:
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "  (Description: %1)").replace("%1", str(description)))
+
+                self.cleanup_old_backups(max_backup_count, log_callback)
+
+                if progress_callback:
+                    progress_callback(100)
+                return True
+
+            except Exception as e:
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error saving: %1").replace("%1", str(str(e))))
+                return False
+            finally:
+                if remote_memory and process_handle:
+                    win32process.VirtualFreeEx(process_handle, remote_memory, 0, Win32Constants.MEM_RELEASE)
+                if process_handle:
+                    win32api.CloseHandle(process_handle)
 
     def restore(self, log_callback: Callable[[str], None],
-                filename: Optional[str] = None,
-                progress_callback: Optional[Callable[[int], None]] = None,
-                enable_scaling: bool = False) -> Tuple[bool, Optional[Dict]]:
+                    filename: Optional[str] = None,
+                    progress_callback: Optional[Callable[[int], None]] = None,
+                    enable_scaling: bool = False) -> Tuple[bool, Optional[Dict]]:
 
-        if filename:
-            filepath = os.path.join(BACKUP_DIR, filename)
-        else:
-            filepath = self._get_latest_backup_path()
-
-        if not filepath or not os.path.exists(filepath):
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error: Backup file not found."))
-            return False, None
-
-        filename = Path(filepath).name
-        readable_date, resolution_saved, _ = parse_backup_filename(filename)
-        #
-        log_callback(QCoreApplication.translate("DesktopIconManager", "Attempting to restore from backup: '%1'").replace("%1", str(filename)))
-        log_callback(QCoreApplication.translate("DesktopIconManager", "Saved Resolution (from filename): %1").replace("%1", str(resolution_saved)))
-
-        saved_metadata = None
-        description = "N/A"
-
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                profile_data = json.load(f)
-
-            if "icons" in profile_data:
-                saved_icons = profile_data["icons"]
-                saved_metadata = profile_data.get("display_metadata")
-                description = profile_data.get("description", "N/A")
-                log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (saved: %1)").replace("%1", str(readable_date)))
-                log_callback(QCoreApplication.translate("DesktopIconManager", "  Description: %1").replace("%1", str(description)))
+            if filename:
+                filepath = os.path.join(BACKUP_DIR, filename)
             else:
-                saved_icons = profile_data
-                log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (Old format, no timestamp/metadata)"))
+                filepath = self._get_latest_backup_path()
 
-        except json.JSONDecodeError as e:
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error: Invalid backup file format: %1").replace("%1", str(str(e))))
-            return False, None
+            if not filepath or not os.path.exists(filepath):
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error: Backup file not found."))
+                return False, None
 
-        scaling_active = False
-        scale_x = 1.0
-        scale_y = 1.0
+            filename = Path(filepath).name
+            readable_date, resolution_saved, _ = parse_backup_filename(filename)
 
-        current_metadata = get_display_metadata()
-        current_res_str = current_metadata.get("primary_resolution", "UnknownResolution")
-        current_res = parse_resolution_string(current_res_str)
-        saved_res = parse_resolution_string(resolution_saved)
+            log_callback(QCoreApplication.translate("DesktopIconManager", "Attempting to restore from backup: '%1'").replace("%1", str(filename)))
+            log_callback(QCoreApplication.translate("DesktopIconManager", "Saved Resolution (from filename): %1").replace("%1", str(resolution_saved)))
 
-        if enable_scaling and current_res and saved_res and current_res != saved_res:
-            saved_width, saved_height = saved_res
-            current_width, current_height = current_res
-            scale_x = current_width / saved_width
-            scale_y = current_height / saved_height
-            scaling_active = True
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Adaptive Scaling enabled: Saved %1x%2 -> Current %3x%4").replace("%1", str(saved_width)).replace("%2", str(saved_height)).replace("%3", str(current_width)).replace("%4", str(current_height)))
-            log_callback(QCoreApplication.translate("DesktopIconManager", "  **[SCALING APPLIED]** Scaling factors: X=%1, Y=%2").replace("%1", str(f"{scale_x:.3f}")).replace("%2", str(f"{scale_y:.3f}")))
-        else:
-            if enable_scaling:
-                log_callback(QCoreApplication.translate("DesktopIconManager", "Adaptive Scaling enabled, but resolutions match or are invalid. Scaling skipped."))
-            else:
-                log_callback(QCoreApplication.translate("DesktopIconManager", "Adaptive Scaling is disabled. Restoring raw coordinates."))
+            saved_metadata = None
+            description = "N/A"
 
-        win32gui.SendMessage(self.hwnd_listview, win32con.WM_SETREDRAW, 0, 0)
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    profile_data = json.load(f)
 
-        pid = win32process.GetWindowThreadProcessId(self.hwnd_listview)[1]
-        process_handle = None
-        remote_memory = None
+                if isinstance(profile_data, dict) and "icons" in profile_data:
+                    saved_icons = profile_data["icons"]
+                    saved_metadata = profile_data.get("display_metadata")
+                    description = profile_data.get("description", "N/A")
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (saved: %1)").replace("%1", str(readable_date)))
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "  Description: %1").replace("%1", str(description)))
+                else:
+                    saved_icons = profile_data
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (Old format, no timestamp/metadata)"))
 
-        try:
-            process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, pid)
-            remote_memory = win32process.VirtualAllocEx(
-                process_handle, 0, REMOTE_BUFFER_SIZE, Win32Constants.MEM_COMMIT, Win32Constants.PAGE_READWRITE
-            )
+            except json.JSONDecodeError as e:
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error: Invalid backup file format: %1").replace("%1", str(str(e))))
+                return False, None
 
-            count = win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMCOUNT, 0, 0)
-            log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring positions for %1 saved icons...").replace("%1", str(len(saved_icons))))
+            scaling_active = False
+            scale_x, scale_y = 1.0, 1.0
+            current_metadata = get_display_metadata()
+            current_res_str = current_metadata.get("primary_resolution", "UnknownResolution")
+            current_res = parse_resolution_string(current_res_str)
+            saved_res = parse_resolution_string(resolution_saved)
 
-            current_map = {}
-            for i in range(count):
-                if progress_callback:
-                    progress_callback(int((i / (count * 2)) * 100))
+            if enable_scaling and current_res and saved_res and current_res != saved_res:
+                scale_x = current_res[0] / saved_res[0]
+                scale_y = current_res[1] / saved_res[1]
+                scaling_active = True
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Adaptive Scaling enabled: X=%1, Y=%2").replace("%1", f"{scale_x:.3f}").replace("%2", f"{scale_y:.3f}"))
+
+            win32gui.SendMessage(self.hwnd_listview, win32con.WM_SETREDRAW, 0, 0)
+
+            pid = win32process.GetWindowThreadProcessId(self.hwnd_listview)[1]
+            process_handle = None
+            remote_memory = None
+
+            try:
+                process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, pid)
+                remote_memory = win32process.VirtualAllocEx(process_handle, 0, REMOTE_BUFFER_SIZE, Win32Constants.MEM_COMMIT, Win32Constants.PAGE_READWRITE)
+
+                count = win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMCOUNT, 0, 0)
+                current_map = {}
 
                 text_buffer_remote = remote_memory + TEXT_BUFFER_OFFSET
-                lvitem_data = struct.pack(
-                    LVITEM_FORMAT, 0x0001, i, 0, 0, 0, text_buffer_remote, 512
-                )
-                win32process.WriteProcessMemory(process_handle, remote_memory, lvitem_data)
-                win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMTEXT, i, remote_memory)
-                text_raw = win32process.ReadProcessMemory(process_handle, text_buffer_remote, TEXT_BUFFER_SIZE)
-                icon_name = text_raw.decode('utf-16-le', errors='ignore').split('\x00')[0]
+                for i in range(count):
+                    if progress_callback:
+                        progress_callback(int((i / (count * 2)) * 100))
 
-                if icon_name:
-                    current_map[icon_name] = i
+                    lvitem = LVITEMW()
+                    lvitem.mask = 0x0001
+                    lvitem.iItem = i
+                    lvitem.pszText = text_buffer_remote
+                    lvitem.cchTextMax = 512
 
-            moved_count = 0
-            skipped_count = 0
-            for idx, (name, pos) in enumerate(saved_icons.items()):
-                if progress_callback:
-                    progress_callback(int((50 + (idx / len(saved_icons)) * 50)))
+                    win32process.WriteProcessMemory(process_handle, remote_memory, bytes(lvitem))
+                    win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_GETITEMTEXTW, i, remote_memory)
+                    text_raw = win32process.ReadProcessMemory(process_handle, text_buffer_remote, 512 * 2)
+                    icon_name = text_raw.decode("utf-16-le").split('\0', 1)[0]
+                    if icon_name:
+                        current_map[icon_name] = i
 
-                if name in current_map:
-                    icon_idx = current_map[name]
-                    x_saved, y_saved = pos
+                moved_count = 0
+                skipped_count = 0
+                total_saved = len(saved_icons)
 
-                    if scaling_active:
-                        x_new = int(x_saved * scale_x)
-                        y_new = int(y_saved * scale_y)
+                for idx, (name, pos) in enumerate(saved_icons.items()):
+                    if progress_callback:
+                        progress_callback(50 + int((idx / total_saved) * 50))
+
+                    if name in current_map:
+                        icon_idx = current_map[name]
+                        x_saved, y_saved = pos
+
+                        x_new = int(x_saved * scale_x) if scaling_active else x_saved
+                        y_new = int(y_saved * scale_y) if scaling_active else y_saved
+
+                        lparam = (y_new << 16) | (x_new & 0xFFFF)
+                        win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_SETITEMPOSITION, icon_idx, lparam)
+                        moved_count += 1
                     else:
-                        x_new = x_saved
-                        y_new = y_saved
+                        skipped_count += 1
 
-                    lparam = (y_new << 16) | (x_new & 0xFFFF)
-                    win32gui.SendMessage(self.hwnd_listview, Win32Constants.LVM_SETITEMPOSITION, icon_idx, lparam)
-                    moved_count += 1
-                else:
-                    skipped_count += 1
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Restored %1 icons").replace("%1", str(moved_count)))
+                if skipped_count > 0:
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "⚠ Skipped %1 icons (not found on desktop)").replace("%1", str(skipped_count)))
 
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✓ Restored %1 icons").replace("%1", str(moved_count)))
-            if skipped_count > 0:
-                log_callback(QCoreApplication.translate("DesktopIconManager", "⚠ Skipped %1 icons (not found on desktop)").replace("%1", str(skipped_count)))
+                if progress_callback:
+                    progress_callback(100)
+                return True, saved_metadata
 
-            if progress_callback:
-                progress_callback(100)
-            return True, saved_metadata
-
-        except Exception as e:
-            log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error restoring: %1").replace("%1", str(str(e))))
-            return False, saved_metadata
-        finally:
-            if remote_memory and process_handle:
-                win32process.VirtualFreeEx(process_handle, remote_memory, 0, Win32Constants.MEM_RELEASE)
-            if process_handle:
-                win32api.CloseHandle(process_handle)
+            except Exception as e:
+                log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error restoring: %1").replace("%1", str(e)))
+                return False, saved_metadata
+            finally:
+                win32gui.SendMessage(self.hwnd_listview, win32con.WM_SETREDRAW, 1, 0)
+                win32gui.InvalidateRect(self.hwnd_listview, None, True)
+                if remote_memory and process_handle:
+                    win32process.VirtualFreeEx(process_handle, remote_memory, 0, Win32Constants.MEM_RELEASE)
+                if process_handle:
+                    win32api.CloseHandle(process_handle)
 
     def scramble_icons(self, log_callback: Callable[[str], None],
                        progress_callback: Optional[Callable[[int], None]] = None) -> bool:
@@ -572,7 +576,7 @@ class IconWorker(QThread):
                 save_success = self.manager.save(
                     lambda msg: self.log_signal.emit(self.tr("  [Pre-Scramble Backup] %1").replace("%1", str(msg))),
                     lambda val: self.progress_signal.emit(int(val * 0.5)),
-                    description=self.tr("Auto-Backup before Scramble (Random)"),
+                    description=self.tr("Backup before Scramble"),
                     max_backup_count=0
                 )
                 if save_success:
@@ -600,26 +604,22 @@ class BackupManagerWindow(QDialog):
         super().__init__(parent)
         self.manager = manager
         self.setWindowTitle(self.tr("Select, Restore, or Delete Backup"))
-        self.setFixedSize(800, 500)  # Increased height to accommodate the search bar
+        self.setFixedSize(800, 500)
 
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(10)
 
-        # Instructions label
         self.layout.addWidget(QLabel(self.tr("Select a backup to restore or right-click to delete.")))
 
-        # --- SEARCH FILTER UI ---
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self.tr("Search by tag, resolution, or date..."))
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.filter_backups)
         self.layout.addWidget(self.search_input)
-        # ------------------------
 
         h_split = QHBoxLayout()
         left_panel = QVBoxLayout()
 
-        # Header with fixed-width font for alignment
         header_text = (
             f"{self.tr('TAG/DESCRIPTION'):<40} "
             f"| {self.tr('RESOLUTION'):<12} "
@@ -637,7 +637,6 @@ class BackupManagerWindow(QDialog):
 
         h_split.addLayout(left_panel, 3)
 
-        # Right panel for preview and details
         right_panel = QVBoxLayout()
         right_panel.addWidget(QLabel(self.tr("Layout Preview:")))
 
@@ -653,7 +652,6 @@ class BackupManagerWindow(QDialog):
         h_split.addLayout(right_panel, 1)
         self.layout.addLayout(h_split)
 
-        # Bottom buttons
         button_layout = QHBoxLayout()
         self.btn_restore = QPushButton(self.tr("Restore Selected Layout"))
         self.btn_restore.clicked.connect(self.restore_selected)
@@ -668,7 +666,6 @@ class BackupManagerWindow(QDialog):
         button_layout.addWidget(self.btn_close)
         self.layout.addLayout(button_layout)
 
-        # Signals connections
         self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
         self.list_widget.itemDoubleClicked.connect(self.restore_selected)
         self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -764,7 +761,6 @@ class BackupManagerWindow(QDialog):
     def update_button_states(self):
         """Enables/disables buttons based on selection."""
         has_selection = bool(self.list_widget.selectedItems())
-        # Ensure the 'No backups found' item doesn't enable the button
         if has_selection and self.list_widget.selectedItems()[0].data(Qt.ItemDataRole.UserRole) is None:
             has_selection = False
         self.btn_restore.setEnabled(has_selection)
@@ -821,7 +817,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.manager = DesktopIconManager()
-        #
         self.current_resolution = get_display_metadata().get("primary_resolution", self.tr("Unknown"))
 
         app_path = Path(os.path.abspath(sys.argv[0])).parent
@@ -848,24 +843,20 @@ class MainWindow(QMainWindow):
 
         tray_menu = QMenu()
 
-        #
         self.action_tray_save = QAction(self.tr("Quick Save"), self)
         self.action_tray_save.triggered.connect(lambda: self.start_save(description=self.tr("Quick Save (Tray)")))
         tray_menu.addAction(self.action_tray_save)
 
-        #
         self.action_tray_restore = QAction(self.tr("Restore Latest"), self)
         self.action_tray_restore.triggered.connect(self.start_restore_latest)
         tray_menu.addAction(self.action_tray_restore)
 
         tray_menu.addSeparator()
 
-        #
         self.action_tray_show = QAction(self.tr("Show Window"), self)
         self.action_tray_show.triggered.connect(self.show_window)
         tray_menu.addAction(self.action_tray_show)
 
-        #
         self.action_tray_exit = QAction(self.tr("Exit"), self)
         self.action_tray_exit.triggered.connect(self.exit_application)
         tray_menu.addAction(self.action_tray_exit)
@@ -887,7 +878,6 @@ class MainWindow(QMainWindow):
         self.close()
 
     def setup_ui(self):
-        #
         self.setWindowTitle(self.tr("Desktop Icon Backup Manager by mapi68"))
         self.setWindowIcon(QIcon(resource_path("icon.ico")))
 
@@ -895,73 +885,59 @@ class MainWindow(QMainWindow):
         menu_bar = self.menuBar()
 
 
-        # File Menu
-        #
         file_menu = menu_bar.addMenu(self.tr("&File"))
 
-        #
         self.action_scramble_icons = QAction(self.tr("Scramble Desktop Icons (Random)"), self)
         self.action_scramble_icons.setToolTip(self.tr("Randomizes the position of all desktop icons after creating a mandatory backup."))
         self.action_scramble_icons.triggered.connect(self.start_scramble)
         file_menu.addAction(self.action_scramble_icons)
         file_menu.addSeparator()
 
-        #
         self.action_remove_all = QAction(self.tr("Remove All Backups..."), self)
         self.action_remove_all.triggered.connect(self.confirm_and_delete_all_backups)
         file_menu.addAction(self.action_remove_all)
 
         file_menu.addSeparator()
-        #
         action_exit = QAction(self.tr("E&xit"), self)
         action_exit.setShortcut("Ctrl+Q")
         action_exit.triggered.connect(self.exit_application)
         file_menu.addAction(action_exit)
 
 
-        # Settings Menu
-        #
         settings_menu = menu_bar.addMenu(self.tr("&Settings"))
 
-        #
         self.action_start_minimized = QAction(self.tr("Start Minimized to Tray"), self, checkable=True)
         self.action_start_minimized.triggered.connect(lambda checked: self.settings.setValue("start_minimized", checked))
         settings_menu.addAction(self.action_start_minimized)
 
         settings_menu.addSeparator()
 
-        #
         self.action_auto_save = QAction(self.tr("Auto-Save on Exit"), self, checkable=True)
         self.action_auto_save.triggered.connect(lambda checked: self.settings.setValue("auto_save_on_exit", checked))
         settings_menu.addAction(self.action_auto_save)
 
-        #
         self.action_auto_restore = QAction(self.tr("Auto-Restore on Startup"), self, checkable=True)
         self.action_auto_restore.triggered.connect(lambda checked: self.settings.setValue("auto_restore_on_startup", checked))
         settings_menu.addAction(self.action_auto_restore)
 
         settings_menu.addSeparator()
 
-        #
         self.action_adaptive_scaling = QAction(self.tr("Enable Adaptive Scaling on Restore"), self, checkable=True)
         self.action_adaptive_scaling.triggered.connect(lambda checked: self.settings.setValue("adaptive_scaling_enabled", checked))
         settings_menu.addAction(self.action_adaptive_scaling)
 
         settings_menu.addSeparator()
 
-        #
         self.action_close_to_tray = QAction(self.tr("Minimize to Tray on Close ('X' button)"), self, checkable=True)
         self.action_close_to_tray.triggered.connect(lambda checked: self.settings.setValue("close_to_tray", checked))
         settings_menu.addAction(self.action_close_to_tray)
 
         settings_menu.addSeparator()
 
-        #
         self.cleanup_group = QMenu(self.tr("Automatic Backup Cleanup Limit"), self)
         settings_menu.addMenu(self.cleanup_group)
         self.cleanup_actions = {}
 
-        #
         limits = {
             self.tr("Disabled (Keep All)"): 0,
             self.tr("Keep Last 5"): 5,
@@ -976,17 +952,14 @@ class MainWindow(QMainWindow):
             self.cleanup_group.addAction(action)
             self.cleanup_actions[limit] = action
 
-        # Help Menu
         help_menu = menu_bar.addMenu(self.tr("&Help"))
 
-        # Online User Manual
         action_manual = QAction(self.tr("Online User Manual"), self)
         action_manual.triggered.connect(lambda: QDesktopServices.openUrl(QUrl("https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf")))
         help_menu.addAction(action_manual)
 
         help_menu.addSeparator()
 
-        # About
         action_about = QAction(self.tr("&About"), self)
         action_about.triggered.connect(self.show_about_dialog)
         help_menu.addAction(action_about)
@@ -1001,11 +974,9 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.progress_bar)
 
         self.save_tag_input = QLineEdit()
-        #
         self.save_tag_input.setPlaceholderText(self.tr("Optional: Enter a descriptive tag/description..."))
 
         tag_input_row = QHBoxLayout()
-        #
         tag_input_row.addWidget(QLabel(self.tr("Save Tag:")))
         tag_input_row.addWidget(self.save_tag_input, 1)
         layout.addLayout(tag_input_row)
@@ -1013,21 +984,18 @@ class MainWindow(QMainWindow):
         action_buttons_row = QHBoxLayout()
         action_buttons_row.setSpacing(10)
 
-        #
         self.btn_save_latest = QPushButton(self.tr("💾 SAVE QUICK BACKUP"))
         self.btn_save_latest.setMinimumHeight(50)
         self.btn_save_latest.setToolTip(self.tr("Save current desktop icon positions to a new file, using the tag above."))
         self.btn_save_latest.clicked.connect(self.quick_save_with_tag)
         self.btn_save_latest.setObjectName("saveButton")
 
-        #
         self.btn_restore_latest = QPushButton(self.tr("↺ RESTORE LATEST"))
         self.btn_restore_latest.setMinimumHeight(50)
         self.btn_restore_latest.setToolTip(self.tr("Restore icon positions from the LATEST backup file found."))
         self.btn_restore_latest.clicked.connect(self.start_restore_latest)
         self.btn_restore_latest.setObjectName("restoreButton")
 
-        #
         self.btn_restore_select = QPushButton(self.tr("↺ BACKUP MANAGER"))
         self.btn_restore_select.setMinimumHeight(50)
         self.btn_restore_select.setToolTip(self.tr("Opens a window to select a specific backup file to restore or delete."))
@@ -1040,7 +1008,6 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(action_buttons_row)
 
-        #
         layout.addWidget(QLabel(self.tr("Activity Log:")))
 
         self.log_area = QTextEdit()
@@ -1049,24 +1016,19 @@ class MainWindow(QMainWindow):
         self.log_area.setMaximumHeight(600)
         layout.addWidget(self.log_area)
 
-        # Horizontal layout to group both elements
         log_button_layout = QHBoxLayout()
 
-        # Current Resolution Label
         self.status_label = QLabel(self.tr("Current Resolution: %1").replace("%1", self.current_resolution))
         log_button_layout.addWidget(self.status_label)
 
-        # Spacer to push the button to the far right
         log_button_layout.addStretch(1)
 
-        # Clear Log Button
         self.btn_clear_log = QPushButton(self.tr("Clear Log"))
         self.btn_clear_log.clicked.connect(self.log_area.clear)
         self.btn_clear_log.setMaximumWidth(150)
         self.btn_clear_log.setObjectName("clearLogButton")
         log_button_layout.addWidget(self.btn_clear_log)
 
-        # Add the horizontal layout to the main layout
         layout.addLayout(log_button_layout)
 
         self.setStyleSheet("""
@@ -1091,10 +1053,8 @@ class MainWindow(QMainWindow):
         """)
 
     def setup_shortcuts(self):
-        #
         save_shortcut = QAction(self.tr("Save"), self)
         save_shortcut.setShortcut(QKeySequence("Ctrl+S"))
-        #
         save_shortcut.triggered.connect(lambda: self.start_save(description=self.tr("Quick Backup (Shortcut)")))
         self.addAction(save_shortcut)
 
@@ -1114,7 +1074,6 @@ class MainWindow(QMainWindow):
     def _set_cleanup_limit(self, limit: int):
         self.settings.setValue("cleanup_limit", limit)
         self._update_cleanup_menu_check(limit)
-        #
         self.log(self.tr("Automatic cleanup limit set to: %n backup(s) (0 = Disabled).", None, limit))
 
     def _update_cleanup_menu_check(self, current_limit: int):
@@ -1151,13 +1110,11 @@ class MainWindow(QMainWindow):
     def open_backup_manager(self):
         manager_window = BackupManagerWindow(self.manager, self)
         manager_window.restore_requested.connect(self.start_restore_specific)
-        #
         manager_window.list_changed_signal.connect(lambda: self.log(self.tr("Backup list updated (item deleted).")))
         manager_window.exec()
 
     def quick_save_with_tag(self):
         tag = self.save_tag_input.text().strip()
-        #
         description = tag if tag else self.tr("Quick Backup")
         self.start_save(description=description)
 
@@ -1165,7 +1122,6 @@ class MainWindow(QMainWindow):
         self._start_restore(filename)
 
     def show_about_dialog(self):
-        #
         QMessageBox.about(
             self,
             self.tr("About Desktop Icon Backup Manager"),
@@ -1193,7 +1149,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, self.tr("No Backups Found"), self.tr("There are no backup files to delete."))
             return
 
-        #
         reply = QMessageBox.warning(
             self, self.tr("WARNING: Delete All Backups"),
             self.tr("Are you absolutely sure you want to permanently delete ALL %n desktop icon backup file(s)?\n\nThis action cannot be undone!", None, backup_count),
@@ -1215,14 +1170,12 @@ class MainWindow(QMainWindow):
     def start_save(self, description: Optional[str] = None):
         cleanup_limit = self.settings.value("cleanup_limit", 0, type=int)
 
-        #
         self.log(self.tr("Starting new timestamped backup..."))
         if description:
             self.log(self.tr("  (Tag: %1)").replace("%1", str(description)))
 
         self.toggle_buttons(False)
         self.show_progress(True)
-        #
         self.statusBar().showMessage(self.tr("Saving..."))
 
         self.worker = IconWorker('save', description=description, max_backup_count=cleanup_limit)
@@ -1255,7 +1208,6 @@ class MainWindow(QMainWindow):
             description = "N/A (Old Format)"
             icon_count = "N/A"
 
-        #
         reply = QMessageBox.question(
             self, self.tr("Confirm Restore"),
             self.tr("Restore icon positions from the LATEST backup file:\n\nFile: %1\nResolution: %2\nIcons: %3\nTag: %4\nTimestamp: %5\n\nAre you sure you want to proceed?")
@@ -1269,11 +1221,9 @@ class MainWindow(QMainWindow):
     def _start_restore(self, filename: Optional[str] = None):
         enable_scaling = self.settings.value("adaptive_scaling_enabled", False, type=bool)
 
-        #
         self.log(self.tr("Starting restore from backup '%1'...").replace("%1", str(filename if filename else self.tr('latest'))))
         self.toggle_buttons(False)
         self.show_progress(True)
-        #
         self.statusBar().showMessage(self.tr("Restoring..."))
 
         self.worker = IconWorker('restore', filename, enable_scaling=enable_scaling)
@@ -1283,7 +1233,6 @@ class MainWindow(QMainWindow):
         self.worker.start()
 
     def start_scramble(self):
-        #
         reply = QMessageBox.question(
             self, self.tr("Confirm Scramble"),
             self.tr("Are you sure you want to randomize the positions of ALL desktop icons?\n\n**A mandatory backup will be created first**.\n\nDo you want to proceed?"),
