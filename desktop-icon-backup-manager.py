@@ -41,16 +41,6 @@ try:
         VERSION = "0.0.0"
 except Exception as e:
     VERSION = "0.0.0"
-# ------------------------------------------
-
-# --- PYINSTALLER RESOURCE PATH FIX ---
-def resource_path(relative_path: str) -> str:
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-# ------------------------------------
 
 # --- WIN32 CONSTANTS ---
 class Win32Constants:
