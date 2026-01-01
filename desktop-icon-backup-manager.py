@@ -151,10 +151,24 @@ def get_resolution_from_filename(filename: str) -> str:
 class IconPreviewWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(220, 124)
+        self.setFixedSize(450, 250)
         self.icons = {}
         self.screen_res = (1920, 1080)
-        self.setStyleSheet("background-color: #1a1a1a; border: 2px solid #333; border-radius: 4px;")
+        self.setMouseTracking(True)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #1a1a1a;
+                border: 2px solid #333;
+                border-radius: 4px;
+            }
+            QToolTip {
+                color: #000000;
+                background-color: #ffffdc;
+                border: 1px solid #000000;
+                font-family: 'Segoe UI';
+                font-size: 12px;
+            }
+        """)
 
     def update_preview(self, icons: Dict, res_tuple: Tuple[int, int]):
         self.icons = icons
@@ -164,22 +178,39 @@ class IconPreviewWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
         if not self.icons:
             painter.setPen(QColor("#666"))
             painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.tr("No Preview Available"))
             return
-
         scale_x = self.width() / self.screen_res[0]
         scale_y = self.height() / self.screen_res[1]
-
-        painter.setPen(QPen(QColor("#0078d7"), 3))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#0078d7"))
         for pos in self.icons.values():
-            x = int(pos[0] * scale_x)
-            y = int(pos[1] * scale_y)
-            x = max(2, min(x, self.width() - 2))
-            y = max(2, min(y, self.height() - 2))
-            painter.drawPoint(x, y)
+            px = int(pos[0] * scale_x)
+            py = int(pos[1] * scale_y)
+            px = max(5, min(px, self.width() - 5))
+            py = max(5, min(py, self.height() - 5))
+            painter.drawEllipse(px - 4, py - 4, 8, 8)
+
+    def mouseMoveEvent(self, event):
+        if not self.icons:
+            return
+        scale_x = self.width() / self.screen_res[0]
+        scale_y = self.height() / self.screen_res[1]
+        found_icon = None
+        for name, pos in self.icons.items():
+            ix = int(pos[0] * scale_x)
+            iy = int(pos[1] * scale_y)
+            dx = event.position().x() - ix
+            dy = event.position().y() - iy
+            if (dx*dx + dy*dy) < 144:
+                found_icon = name
+                break
+        if found_icon:
+            QToolTip.showText(event.globalPosition().toPoint(), found_icon, self)
+        else:
+            QToolTip.hideText()
 
 # --- BACKEND: Icon management logic ---
 class DesktopIconManager:
@@ -408,7 +439,7 @@ class DesktopIconManager:
                     log_callback(QCoreApplication.translate("DesktopIconManager", "  Description: %1").replace("%1", str(description)))
                 else:
                     saved_icons = profile_data
-                    log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (Old format, no timestamp/metadata)"))
+                    log_callback(QCoreApplication.translate("DesktopIconManager", "Restoring layout (Old format, no timestamp and metadata)"))
 
             except json.JSONDecodeError as e:
                 log_callback(QCoreApplication.translate("DesktopIconManager", "✗ Error: Invalid backup file format: %1").replace("%1", str(str(e))))
@@ -600,92 +631,70 @@ class BackupManagerWindow(QDialog):
     restore_requested = pyqtSignal(str)
     list_changed_signal = pyqtSignal()
 
-    def __init__(self, manager: DesktopIconManager, parent=None):
+    def __init__(self, manager, parent=None):
         super().__init__(parent)
         self.manager = manager
         self.setWindowTitle(self.tr("Select, Restore, or Delete Backup"))
-        self.setFixedSize(800, 500)
-
+        self.setFixedSize(1150, 650)
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(10)
-
         self.layout.addWidget(QLabel(self.tr("Select a backup to restore or right-click to delete.")))
-
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self.tr("Search by tag, resolution, or date..."))
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.filter_backups)
         self.layout.addWidget(self.search_input)
-
         h_split = QHBoxLayout()
         left_panel = QVBoxLayout()
-
         header_text = (
-            f"{self.tr('TAG/DESCRIPTION'):<40} "
-            f"| {self.tr('RESOLUTION'):<12} "
-            f"| {self.tr('ICONS'):<5} "
+            f"{self.tr('TAG/DESCRIPTION'):<55} "
+            f"| {self.tr('RESOLUTION'):<14} "
+            f"| {self.tr('ICONS'):<6} "
             f"| {self.tr('TIMESTAMP')}"
         )
         header_label = QLabel(header_text)
         header_label.setStyleSheet("font-family: 'Consolas', monospace; font-size: 11px; font-weight: bold; margin-bottom: 2px;")
         left_panel.addWidget(header_label)
-
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.list_widget.setStyleSheet("font-family: 'Consolas', monospace; font-size: 11px;")
         left_panel.addWidget(self.list_widget)
-
-        h_split.addLayout(left_panel, 3)
-
+        h_split.addLayout(left_panel, 6)
         right_panel = QVBoxLayout()
         right_panel.addWidget(QLabel(self.tr("Layout Preview:")))
-
         self.preview_widget = IconPreviewWidget()
         right_panel.addWidget(self.preview_widget)
-
         self.info_label = QLabel(self.tr("Select a backup to see details."))
         self.info_label.setWordWrap(True)
-        self.info_label.setStyleSheet("color: #555; font-size: 11px; padding: 10px;")
+        self.info_label.setStyleSheet("color: #ccc; background-color: #2b2b2b; border-radius: 4px; padding: 10px; font-family: 'Segoe UI'; font-size: 12px;")
         right_panel.addWidget(self.info_label)
         right_panel.addStretch()
-
-        h_split.addLayout(right_panel, 1)
+        h_split.addLayout(right_panel, 2)
         self.layout.addLayout(h_split)
-
         button_layout = QHBoxLayout()
         self.btn_restore = QPushButton(self.tr("Restore Selected Layout"))
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
-        self.btn_restore.setObjectName("restoreButton")
-
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.clicked.connect(self.reject)
-
         button_layout.addWidget(self.btn_restore)
         button_layout.addStretch(1)
         button_layout.addWidget(self.btn_close)
         self.layout.addLayout(button_layout)
-
         self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
         self.list_widget.itemDoubleClicked.connect(self.restore_selected)
         self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
-
         self.load_backups()
 
     def load_backups(self):
-        """Loads all backup files and populates the list widget."""
         self.list_widget.clear()
         backups = self.manager.get_all_backup_filenames()
-
         if not backups:
-            QListWidgetItem(self.tr("No backups found."), self.list_widget)
-            self.btn_restore.setEnabled(False)
+            self.list_widget.addItem(QListWidgetItem(self.tr("No backups found.")))
             return
-
         for filename in backups:
             readable_date, resolution, _ = parse_backup_filename(filename)
-
             description = ""
             icon_count = "N/A"
             filepath = os.path.join(BACKUP_DIR, filename)
@@ -694,123 +703,78 @@ class BackupManagerWindow(QDialog):
                     data = json.load(f)
                     description = data.get("description", "").strip()
                     icon_count = data.get("icon_count", "N/A")
-            except Exception:
-                pass
-
-            description_display = f"{f'[{description[:38]}]':<41}"
-            resolution_display = f"| {resolution:<13}"
-            icon_count_display = f"| {icon_count:>5}"
-
-            item_text = (
-                f"{description_display}"
-                f"{resolution_display}"
-                f"{icon_count_display}"
-                f" | {readable_date}"
-            )
-
+            except Exception: pass
+            description_display = f"{f'[{description[:52]}]':<56}"
+            resolution_display = f"| {resolution:<15}"
+            icon_count_display = f"| {icon_count:>6}"
+            item_text = f"{description_display}{resolution_display}{icon_count_display} | {readable_date}"
             item = QListWidgetItem(item_text)
             item.setData(Qt.ItemDataRole.UserRole, filename)
             self.list_widget.addItem(item)
 
-        self.update_button_states()
-
-    def filter_backups(self, query):
-        """Filters list items in real-time based on the search input."""
-        query = query.lower()
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            item.setHidden(query not in item.text().lower())
-
     def on_selection_changed(self):
-        """Handles item selection to update the preview and info panel."""
         items = self.list_widget.selectedItems()
         if not items or items[0].data(Qt.ItemDataRole.UserRole) is None:
             self.preview_widget.update_preview({}, (1920, 1080))
             self.info_label.setText(self.tr("Select a backup to see details."))
             self.btn_restore.setEnabled(False)
             return
-
         filename = items[0].data(Qt.ItemDataRole.UserRole)
         filepath = os.path.join(BACKUP_DIR, filename)
-
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 icons = data.get("icons", {})
                 res_str = parse_backup_filename(filename)[1]
                 res_tuple = parse_resolution_string(res_str)
-
                 self.preview_widget.update_preview(icons, res_tuple)
-
-                description = data.get('description', self.tr('None'))
-                timestamp = data.get('timestamp', 'N/A')
-                info_text = (
-                    f"{self.tr('File')}: {filename}\n"
-                    f"{self.tr('Icons')}: {len(icons)}\n"
-                    f"{self.tr('Resolution')}: {res_str}\n"
-                    f"{self.tr('Description')}: {description}\n"
-                    f"{self.tr('Timestamp')}: {timestamp}"
-                )
-                self.info_label.setText(info_text)
+                desc = data.get('description', self.tr('None'))
+                ts = data.get('timestamp', 'N/A')
+                count = len(icons)
+                info = (f"<b>{self.tr('File')}:</b> {filename}<br>"
+                        f"<b>{self.tr('Icons')}:</b> {count}<br>"
+                        f"<b>{self.tr('Resolution')}:</b> {res_str}<br>"
+                        f"<b>{self.tr('Description')}:</b> {desc}<br>"
+                        f"<b>{self.tr('Timestamp')}:</b> {ts}")
+                self.info_label.setText(info)
                 self.btn_restore.setEnabled(True)
         except Exception as e:
-            self.preview_widget.update_preview({}, (1920, 1080))
-            self.info_label.setText(self.tr("Error loading backup:\n%1").replace("%1", str(e)))
+            self.info_label.setText(f"{self.tr('Error')}: {str(e)}")
             self.btn_restore.setEnabled(False)
 
-    def update_button_states(self):
-        """Enables/disables buttons based on selection."""
-        has_selection = bool(self.list_widget.selectedItems())
-        if has_selection and self.list_widget.selectedItems()[0].data(Qt.ItemDataRole.UserRole) is None:
-            has_selection = False
-        self.btn_restore.setEnabled(has_selection)
+    def filter_backups(self, query):
+        query = query.lower()
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            item.setHidden(query not in item.text().lower())
 
-    def show_context_menu(self, pos: QPoint):
-        """Right-click menu for quick actions."""
-        selected_item = self.list_widget.itemAt(pos)
-        if selected_item and selected_item.data(Qt.ItemDataRole.UserRole):
-            context_menu = QMenu(self)
+    def show_context_menu(self, pos):
+        item = self.list_widget.itemAt(pos)
+        if item and item.data(Qt.ItemDataRole.UserRole):
+            menu = QMenu(self)
+            restore_action = QAction(self.tr("Restore Selected"), self)
+            restore_action.triggered.connect(self.restore_selected)
+            delete_action = QAction(self.tr("Delete Selected"), self)
+            delete_action.triggered.connect(self.delete_selected)
+            menu.addAction(restore_action)
+            menu.addAction(delete_action)
+            menu.exec(self.list_widget.mapToGlobal(pos))
 
-            action_restore = QAction(self.tr("Restore Selected"), self)
-            action_restore.triggered.connect(self.restore_selected)
-            context_menu.addAction(action_restore)
-
-            context_menu.addSeparator()
-
-            action_delete = QAction(self.tr("Delete Selected"), self)
-            action_delete.triggered.connect(self.delete_selected)
-            context_menu.addAction(action_delete)
-
-            context_menu.exec(self.list_widget.mapToGlobal(pos))
-
-    def get_selected_filename(self) -> Optional[str]:
+    def get_selected_filename(self):
         selected = self.list_widget.selectedItems()
-        if selected and selected[0].data(Qt.ItemDataRole.UserRole):
-            return selected[0].data(Qt.ItemDataRole.UserRole)
-        return None
+        return selected[0].data(Qt.ItemDataRole.UserRole) if selected else None
 
     def restore_selected(self):
-        filename = self.get_selected_filename()
-        if filename:
-            self.restore_requested.emit(filename)
+        fn = self.get_selected_filename()
+        if fn:
+            self.restore_requested.emit(fn)
             self.accept()
 
     def delete_selected(self):
-        filename = self.get_selected_filename()
-        if not filename: return
-
-        reply = QMessageBox.question(
-            self, self.tr("Confirm Deletion"),
-            self.tr("Are you sure you want to permanently delete the backup:\n%1?").replace("%1", str(filename)),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-
-        if reply == QMessageBox.StandardButton.Yes:
-            if self.manager.delete_backup(filename):
-                self.load_backups()
-                self.list_changed_signal.emit()
-            else:
-                QMessageBox.critical(self, self.tr("Error"), self.tr("Failed to delete backup '%1'.").replace("%1", str(filename)))
+        fn = self.get_selected_filename()
+        if fn and self.manager.delete_backup(fn):
+            self.load_backups()
+            self.list_changed_signal.emit()
 
 # --- FRONTEND: Main Window ---
 class MainWindow(QMainWindow):
@@ -828,7 +792,7 @@ class MainWindow(QMainWindow):
 
         self.create_tray_icon()
 
-        self.DEFAULT_GEOMETRY = QRect(100, 100, 650, 600)
+        self.DEFAULT_GEOMETRY = QRect(100, 100, 800, 650)
 
         self.setup_ui()
         self.setup_shortcuts()

@@ -305,8 +305,8 @@ Opens the comprehensive backup management window that provides:
     resolution, or date
   \item \textbf{Backup List}: Tabular view with aligned columns for
     easy scanning
-  \item \textbf{Visual Preview}: Mini-map showing icon positions from
-    selected backup
+  \item \textbf{Visual Preview}: Mini-map display of icon layouts
+    before restoring, with interactive tooltips for icon identification
   \item \textbf{Detailed Information}: Extended metadata display for
     selected backup
   \item \textbf{Context Menu}: Right-click for quick restore or delete actions
@@ -674,7 +674,6 @@ TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
 
 \textbf{Features}:
 \begin{itemize}
-  \item Fixed size: 220×124 pixels
   \item Dark background (\#1a1a1a) with subtle border
   \item Icons displayed as blue dots (\#0078d7, 3px thickness)
   \item Automatic scaling to fit preview area
@@ -690,6 +689,32 @@ TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
   \item Each icon position is multiplied by scale factors
   \item Positions are clamped to preview boundaries
 \end{itemize}
+
+\subsubsection{Interactive Tooltip Preview}
+
+\textbf{Location}: Integrated within the Visual Preview Panel
+
+\textbf{New Feature}:
+The preview panel now features an interactive tooltip system that
+identifies icons as you hover over them with the mouse.
+
+\begin{itemize}
+  \item {Dynamic Identification}: Hovering over any blue dot
+    (representing an icon) in the preview area will instantly display
+    the icon's name.
+  \item {Enhanced Precision}: The tooltip appears exactly at the
+    mouse position, making it easy to identify specific icons in
+    crowded layouts.
+  \item {Real-time Feedback}: The system updates as you move the
+    cursor across the mini-map, providing immediate visual
+    confirmation of the backup content.
+\end{itemize}
+
+\begin{infobox}[Pro Tip]
+  Use this feature to verify that a backup contains specific
+  shortcuts or files before performing a full restore, especially
+  when dealing with multiple backups created on the same day.
+\end{infobox}
 
 \subsubsection{Information Panel}
 
