@@ -226,6 +226,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   <br><br><br>
 </p>
 
+<p align="center">
+  <img src="images/DIBM_5.png" width="80%" title="Detailed view of the comparison interface">
+  <br><br>
+  <em>Detailed view of the comparison interface</em>
+  <br><br><br>
+</p>
+
 ---
 
 **Note**: This application directly interacts with Windows desktop icon positions. Always keep recent backups before making system changes.

@@ -556,6 +556,73 @@ class DesktopIconManager:
             win32gui.InvalidateRect(self.hwnd_listview, None, True)
             win32api.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "IconMetrics")
 
+# --- BACKEND: Simple Backup Comparison ---
+class BackupComparator:
+    """Compare two backup files"""
+
+    @staticmethod
+    def compare(file1_path: str, file2_path: str) -> Optional[str]:
+        try:
+            # Load first backup
+            with open(file1_path, 'r', encoding='utf-8') as f:
+                data1 = json.load(f)
+            icons1 = data1.get('icons', data1) if isinstance(data1, dict) else data1
+
+            # Load second backup
+            with open(file2_path, 'r', encoding='utf-8') as f:
+                data2 = json.load(f)
+            icons2 = data2.get('icons', data2) if isinstance(data2, dict) else data2
+
+            # Calculate differences
+            names1 = set(icons1.keys())
+            names2 = set(icons2.keys())
+
+            added = names2 - names1
+            removed = names1 - names2
+            moved = []
+
+            for name in names1 & names2:
+                pos1 = icons1[name]
+                pos2 = icons2[name]
+                if pos1 != pos2:
+                    moved.append(name)
+
+            # Build report
+            num_added = len(added)
+            num_removed = len(removed)
+            num_moved = len(moved)
+            num_unchanged = len(names1 & names2) - len(moved)
+            report = QCoreApplication.translate("BackupComparator", "=== COMPARISON RESULTS ===") + "\n\n"
+            report += QCoreApplication.translate("BackupComparator", "Icon(s) Added: %1", None, num_added).replace("%1", str(num_added)) + "\n"
+            report += QCoreApplication.translate("BackupComparator", "Icon(s) Removed: %1", None, num_removed).replace("%1", str(num_removed)) + "\n"
+            report += QCoreApplication.translate("BackupComparator", "Icon(s) Moved: %1", None, num_moved).replace("%1", str(num_moved)) + "\n"
+            report += QCoreApplication.translate("BackupComparator", "Icon(s) Unchanged: %1", None, num_unchanged).replace("%1", str(num_unchanged)) + "\n\n"
+
+            if added:
+                report += QCoreApplication.translate("BackupComparator", "--- ADDED ICONS ---") + "\n"
+                for name in sorted(added):
+                    report += f"  + {name}\n"
+                report += "\n"
+
+            if removed:
+                report += QCoreApplication.translate("BackupComparator", "--- REMOVED ICONS ---") + "\n"
+                for name in sorted(removed):
+                    report += f"  - {name}\n"
+                report += "\n"
+
+            if moved:
+                report += QCoreApplication.translate("BackupComparator", "--- MOVED ICONS ---") + "\n"
+                for name in sorted(moved):
+                    report += f"  ↔ {name}\n"
+
+            if not added and not removed and not moved:
+                report += QCoreApplication.translate("BackupComparator", "✓ No differences - backups are identical!") + "\n"
+
+            return report
+
+        except Exception as e:
+            return None
+
 # --- THREADING: Worker ---
 class IconWorker(QThread):
     log_signal = pyqtSignal(str)
@@ -742,10 +809,17 @@ class BackupManagerWindow(QDialog):
         item = self.list_widget.itemAt(pos)
         if item and item.data(Qt.ItemDataRole.UserRole):
             menu = QMenu(self)
-            restore_action = QAction(self.tr("Restore Selected"), self)
+            restore_action = QAction(self.tr("🔄 Restore Selected"), self)
             restore_action.triggered.connect(self.restore_selected)
-            delete_action = QAction(self.tr("Delete Selected"), self)
+            delete_action = QAction(self.tr("🗑️ Delete Selected"), self)
             delete_action.triggered.connect(self.delete_selected)
+            compare_action = QAction(self.tr("📊 Compare with Latest"), self)
+            compare_action.triggered.connect(self.compare_with_latest)
+            menu.addAction(restore_action)
+            menu.addAction(compare_action)
+            menu.addSeparator()
+            menu.addAction(delete_action)
+            menu.exec(self.list_widget.mapToGlobal(pos))
             menu.addAction(restore_action)
             menu.addAction(delete_action)
             menu.exec(self.list_widget.mapToGlobal(pos))
@@ -765,6 +839,69 @@ class BackupManagerWindow(QDialog):
         if fn and self.manager.delete_backup(fn):
             self.load_backups()
             self.list_changed_signal.emit()
+
+    def compare_with_latest(self):
+        """Compare selected backup with the latest one"""
+        selected_filename = self.get_selected_filename()
+        if not selected_filename:
+            return
+
+        # Get latest backup
+        latest_filename = self.manager.get_latest_backup_filename()
+        if not latest_filename:
+            QMessageBox.warning(self, self.tr("Error"), self.tr("No latest backup found"))
+            return
+
+        if selected_filename == latest_filename:
+            QMessageBox.information(
+                self,
+                self.tr("Same Backup"),
+                self.tr("You selected the latest backup. Nothing to compare.")
+            )
+            return
+
+        # Perform comparison
+        file1 = os.path.join(BACKUP_DIR, selected_filename)
+        file2 = os.path.join(BACKUP_DIR, latest_filename)
+
+        report = BackupComparator.compare(file1, file2)
+
+        if report:
+            # Show results in a simple dialog
+            dialog = QDialog(self)
+            dialog.setWindowTitle(self.tr("Comparison Results"))
+            dialog.resize(600, 500)
+
+            layout = QVBoxLayout(dialog)
+
+            # Header
+            header = QLabel(
+                self.tr("Comparing:\n  📁 %1\n  📁 %2 (Latest)")
+                .replace("%1", selected_filename)
+                .replace("%2", latest_filename)
+            )
+            header.setStyleSheet("font-weight: bold; padding: 10px; background-color: #f0f0f0;")
+            layout.addWidget(header)
+
+            # Results
+            text_area = QTextEdit()
+            text_area.setReadOnly(True)
+            text_area.setPlainText(report)
+            text_area.setStyleSheet("font-family: 'Consolas', monospace; font-size: 11px;")
+            layout.addWidget(text_area)
+
+            # Close button
+            btn_close = QPushButton(self.tr("Close"))
+            btn_close.clicked.connect(dialog.accept)
+            layout.addWidget(btn_close)
+
+            dialog.exec()
+        else:
+            QMessageBox.critical(
+                self,
+                self.tr("Error"),
+                self.tr("Failed to compare backups")
+            )
 
 # --- FRONTEND: Main Window ---
 class MainWindow(QMainWindow):
@@ -1332,7 +1469,7 @@ if __name__ == "__main__":
     parser.add_argument('--backup', action='store_true',
                         help=QCoreApplication.translate("CLI", "Perform a backup"))
     parser.add_argument('--restore', type=str, metavar='FILENAME',
-                        help=QCoreApplication.translate("CLI", "Restore a specific backup or 'latest'"))
+                        help=QCoreApplication.translate("CLI", "Restore a specific backup or latest"))
     parser.add_argument('--silent', action='store_true',
                         help=QCoreApplication.translate("CLI", "Run without showing the GUI"))
 

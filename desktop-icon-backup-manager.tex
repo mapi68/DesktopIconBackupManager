@@ -745,6 +745,31 @@ Timestamp: 2024-12-11T14:30:15.123456
   \item List view updates to reflect removal
 \end{itemize}
 
+\subsubsection{Comparison with Latest Backup}
+The application includes an intelligent verification system that
+compares current desktop
+state with the selected backup before proceeding with the restore operation.
+
+\textbf{Information Displayed for Comparison:}
+\begin{itemize}
+  \item \textbf{Resolution Check}: Compares current screen resolution
+    with the resolution
+    stored in the backup[cite: 13, 140].
+  \item \textbf{Icon Count}: Displays the total number of icons in
+    the backup versus
+    the current icons found on the desktop[cite: 140, 141].
+  \item \textbf{Metadata Validation}: Shows the exact timestamp
+    (YYYY/MM/DD HH:MM:SS)
+    and optional descriptive tags of the latest file[cite: 13, 140].
+\end{itemize}
+
+\begin{infobox}[Safety Verification]
+  If the "Enable Adaptive Scaling" setting is active, the system will
+  automatically
+  calculate the scaling factors if it detects a resolution mismatch during this
+  comparison phase[cite: 161, 162].
+\end{infobox}
+
 \textbf{Selection Behavior}:
 \begin{itemize}
   \item Single-selection mode (one backup at a time)
@@ -1743,6 +1768,12 @@ To report bugs, request features, or get support:
     \centering
     \includegraphics[width=0.8\textwidth]{images/DIBM_4.png}
     \caption{Desktop Icon Backup Manager featuring dark mode and Italian support}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DIBM_5.png}
+    \caption{Detailed view of the comparison interface}
 \end{figure}
 
 \vfill
