@@ -830,9 +830,46 @@ class BackupManagerWindow(QDialog):
 
     def restore_selected(self):
         fn = self.get_selected_filename()
-        if fn:
-            self.restore_requested.emit(fn)
-            self.accept()
+        if not fn:
+            return
+
+        filepath = os.path.join(BACKUP_DIR, fn)
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            readable_date, resolution, _ = parse_backup_filename(fn)
+            description = data.get("description", "N/A")
+            icon_count = data.get("icon_count", "N/A")
+
+            reply = QMessageBox.question(
+                self,
+                self.tr("Confirm Restore"),
+                self.tr("Restore icon positions from the selected backup file:\n\n"
+                       "File: %1\n"
+                       "Resolution: %2\n"
+                       "Icons: %3\n"
+                       "Tag: %4\n"
+                       "Timestamp: %5\n\n"
+                       "Are you sure you want to proceed?")
+                .replace("%1", fn)
+                .replace("%2", resolution)
+                .replace("%3", str(icon_count))
+                .replace("%4", description)
+                .replace("%5", readable_date),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self.restore_requested.emit(fn)
+                self.accept()
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                self.tr("Error"),
+                self.tr("Failed to load backup file:\n%1").replace("%1", str(e))
+            )
 
     def delete_selected(self):
         fn = self.get_selected_filename()
