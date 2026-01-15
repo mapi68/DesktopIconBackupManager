@@ -37,19 +37,23 @@ jobs:
           python-version: ${{ steps.python-version.outputs.version }}
 
       - name: Install build tools
-        run: pip install pyinstaller pipreqs
+        run: pip install pyinstaller
+
+      - name: Install dependencies
+        run: pip install pywin32 PyQt6
 
       - name: Generate requirements.txt
-        run: pipreqs --force .
+        shell: pwsh
+        run: |
+          $reqs = pip freeze | Select-String "pywin32", "PyQt6"
+          $reqs = $reqs -join "`n"
+          [System.IO.File]::WriteAllText("requirements.txt", $reqs)
 
       - name: Commit requirements.txt
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'feat(build): update requirements.txt'
+          commit_message: 'feat(build): update requirements.txt with exact versions'
           file_pattern: requirements.txt
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
 
       - name: Set up UPX
         run: choco install upx -y
@@ -60,7 +64,7 @@ jobs:
       - name: Create artifact folder
         shell: pwsh
         run: |
-          mkdir artifact_contents
+          if (!(Test-Path artifact_contents)) { mkdir artifact_contents }
           move dist\desktop-icon-backup-manager_*.exe artifact_contents/
 
       - name: Save ZIP artifact
@@ -71,7 +75,7 @@ jobs:
 
       - name: Create Release ZIP
         shell: pwsh
-        run: Compress-Archive -Path artifact_contents/* -DestinationPath desktop-icon-backup-manager.zip
+        run: Compress-Archive -Path artifact_contents/* -DestinationPath desktop-icon-backup-manager.zip -Force
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
