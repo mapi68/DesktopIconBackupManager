@@ -83,6 +83,7 @@ jobs:
           files: desktop-icon-backup-manager.zip
           tag_name: v${{ steps.app_version.outputs.version }}
           name: Release v${{ steps.app_version.outputs.version }}
+          generate_release_notes: true
           draft: false
           prerelease: false
         env:
