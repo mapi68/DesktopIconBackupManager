@@ -1163,28 +1163,34 @@ class BackupManagerWindow(QDialog):
             item = self.list_widget.item(i)
             item.setHidden(query not in item.text().lower())
 
-    def show_context_menu(self, pos):
-        item = self.list_widget.itemAt(pos)
-        if item and item.data(Qt.ItemDataRole.UserRole):
-            menu = QMenu(self)
-            restore_action = QAction(self.tr("🔄 Restore Selected"), self)
-            restore_action.triggered.connect(self.restore_selected)
-            delete_action = QAction(self.tr("🗑️ Delete Selected"), self)
-            delete_action.triggered.connect(self.delete_selected)
-            compare_action = QAction(self.tr("📊 Compare with Latest"), self)
-            compare_action.triggered.connect(self.compare_with_latest)
-            menu.addAction(restore_action)
-            menu.addAction(compare_action)
-            menu.addSeparator()
-            menu.addAction(delete_action)
-            menu.exec(self.list_widget.mapToGlobal(pos))
-            menu.addAction(restore_action)
-            menu.addAction(delete_action)
-            menu.exec(self.list_widget.mapToGlobal(pos))
-
     def get_selected_filename(self):
         selected = self.list_widget.selectedItems()
-        return selected[0].data(Qt.ItemDataRole.UserRole) if selected else None
+        if not selected:
+            return None
+        return selected[0].data(Qt.ItemDataRole.UserRole)
+
+    def show_context_menu(self, pos):
+        item = self.list_widget.itemAt(pos)
+        if not item or not item.data(Qt.ItemDataRole.UserRole):
+            return
+
+        menu = QMenu(self)
+
+        restore_action = QAction(self.tr("🔄 Restore Selected"), self)
+        restore_action.triggered.connect(self.restore_selected)
+
+        delete_action = QAction(self.tr("🗑️ Delete Selected"), self)
+        delete_action.triggered.connect(self.delete_selected)
+
+        compare_action = QAction(self.tr("📊 Compare with Latest"), self)
+        compare_action.triggered.connect(self.compare_with_latest)
+
+        menu.addAction(restore_action)
+        menu.addAction(compare_action)
+        menu.addSeparator()
+        menu.addAction(delete_action)
+
+        menu.exec(self.list_widget.mapToGlobal(pos))
 
     def restore_selected(self):
         fn = self.get_selected_filename()
@@ -1233,13 +1239,38 @@ class BackupManagerWindow(QDialog):
 
     def delete_selected(self):
         fn = self.get_selected_filename()
-        if fn and self.manager.delete_backup(fn):
-            self.load_backups()
-            self.list_changed_signal.emit()
+        if not fn:
+            return
+
+        reply = QMessageBox.question(
+            self,
+            self.tr("Confirm Delete"),
+            self.tr("Are you sure you want to delete this backup?\n\n%1").replace(
+                "%1", fn
+            ),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            if self.manager.delete_backup(fn):
+                self.load_backups()
+                self.list_changed_signal.emit()
+                QMessageBox.information(
+                    self, self.tr("Success"), self.tr("Backup deleted successfully.")
+                )
+            else:
+                QMessageBox.critical(
+                    self, self.tr("Error"), self.tr("Failed to delete backup file.")
+                )
 
     def compare_with_latest(self):
         selected_filename = self.get_selected_filename()
         if not selected_filename:
+            QMessageBox.warning(
+                self,
+                self.tr("No Selection"),
+                self.tr("Please select a backup to compare."),
+            )
             return
 
         latest_filename = self.manager.get_latest_backup_filename()
@@ -1265,30 +1296,74 @@ class BackupManagerWindow(QDialog):
         if report:
             dialog = QDialog(self)
             dialog.setWindowTitle(self.tr("Comparison Results"))
-            dialog.resize(600, 500)
+            dialog.resize(650, 550)
+
+            dialog.setStyleSheet(
+                """
+                QDialog {
+                    background-color: #1e1e1e;
+                }
+                QLabel {
+                    color: #ffffff;
+                    background-color: #2d2d30;
+                    border: 1px solid #3f3f46;
+                    border-radius: 4px;
+                    padding: 12px;
+                    font-family: 'Segoe UI';
+                    font-size: 11px;
+                }
+                QTextEdit {
+                    color: #d4d4d4;
+                    background-color: #1e1e1e;
+                    border: 1px solid #3f3f46;
+                    border-radius: 4px;
+                    font-family: 'Consolas', monospace;
+                    font-size: 11px;
+                    selection-background-color: #264f78;
+                    selection-color: #ffffff;
+                }
+                QPushButton {
+                    color: #ffffff;
+                    background-color: #0e639c;
+                    border: 1px solid #1177bb;
+                    border-radius: 4px;
+                    padding: 8px 16px;
+                    font-family: 'Segoe UI';
+                    font-size: 11px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #1177bb;
+                    border: 1px solid #1c8dd9;
+                }
+                QPushButton:pressed {
+                    background-color: #0d5a8f;
+                }
+            """
+            )
 
             layout = QVBoxLayout(dialog)
+            layout.setSpacing(10)
+            layout.setContentsMargins(15, 15, 15, 15)
 
             header = QLabel(
-                self.tr("Comparing:\n  📁 %1\n  📁 %2 (Latest)")
-                .replace("%1", selected_filename)
-                .replace("%2", latest_filename)
-            )
-            header.setStyleSheet(
-                "font-weight: bold; padding: 10px; background-color: #f0f0f0;"
+                f"<b style='color: #4ec9b0;'>{self.tr('Comparing Backups:')}</b><br>"
+                f"<span style='color: #9cdcfe;'>📄 {selected_filename}</span><br>"
+                f"<span style='color: #4fc1ff;'>📄 {latest_filename} ({self.tr('latest')})</span>"
             )
             layout.addWidget(header)
 
             text_area = QTextEdit()
             text_area.setReadOnly(True)
-            text_area.setPlainText(report)
-            text_area.setStyleSheet(
-                "font-family: 'Consolas', monospace; font-size: 11px;"
-            )
+
+            html_report = self._colorize_comparison_report(report)
+            text_area.setHtml(html_report)
+
             layout.addWidget(text_area)
 
-            btn_close = QPushButton(self.tr("Close"))
+            btn_close = QPushButton(self.tr("✓ Close"))
             btn_close.clicked.connect(dialog.accept)
+            btn_close.setMinimumHeight(35)
             layout.addWidget(btn_close)
 
             dialog.exec()
@@ -1296,6 +1371,36 @@ class BackupManagerWindow(QDialog):
             QMessageBox.critical(
                 self, self.tr("Error"), self.tr("Failed to compare backups")
             )
+
+    def _colorize_comparison_report(self, report: str) -> str:
+        lines = report.split("\n")
+        html_lines = []
+
+        for line in lines:
+            if line.startswith("==="):
+                html_lines.append(
+                    f"<p style='color: #4ec9b0; font-weight: bold; font-size: 12pt;'>{line}</p>"
+                )
+            elif line.startswith("---"):
+                html_lines.append(
+                    f"<p style='color: #dcdcaa; font-weight: bold; margin-top: 10px;'>{line}</p>"
+                )
+            elif "Icon(s) Added:" in line or "  + " in line:
+                html_lines.append(f"<p style='color: #4ec9b0;'>{line}</p>")
+            elif "Icon(s) Removed:" in line or "  - " in line:
+                html_lines.append(f"<p style='color: #f48771;'>{line}</p>")
+            elif "Icon(s) Moved:" in line or "  ↔" in line:
+                html_lines.append(f"<p style='color: #dcdcaa;'>{line}</p>")
+            elif "Icon(s) Unchanged:" in line:
+                html_lines.append(f"<p style='color: #808080;'>{line}</p>")
+            elif "✓" in line:
+                html_lines.append(
+                    f"<p style='color: #89d185; font-weight: bold;'>{line}</p>"
+                )
+            else:
+                html_lines.append(f"<p style='color: #d4d4d4;'>{line}</p>")
+
+        return "".join(html_lines)
 
 
 class MainWindow(QMainWindow):
