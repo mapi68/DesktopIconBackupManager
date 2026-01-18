@@ -209,6 +209,27 @@ On first run, the program automatically:
   error: "Unable to find desktop ListView control."
 \end{warningbox}
 
+\section{Command Line Interface (CLI)}
+The application can be operated via terminal for automation and
+scripting without using the graphical interface.
+
+\begin{description}[style=nextline]
+  \item[\texttt{--save}] Performs an immediate backup with the tag
+    "CLI Quick Save" and exits.
+  \item[\texttt{--restore <filename>}] Restores icons from the
+    specified JSON file.
+  \item[\texttt{--latest}] Combined with \texttt{--restore}, it
+    automatically selects the most recent backup.
+  \item[\texttt{--silent}] Runs the operation in the background
+    without showing any windows or taskbar icons.
+  \item[\texttt{--enable-scaling}] Forces coordinate scaling if a
+    resolution mismatch is detected during CLI restore.
+\end{description}
+
+\begin{infobox}[Example CLI Usage]
+  \texttt{python desktop-icon-backup-manager.py --restore --latest --silent}
+\end{infobox}
+
 \section{Main Interface}
 
 \subsection{Interface Overview}
@@ -650,7 +671,7 @@ column alignment:
 \begin{enumerate}
   \item \textbf{TAG/DESCRIPTION} (40 chars width): User-provided
     description, truncated with "..." if longer than 38 characters,
-    shown in brackets [Description Here]
+    -    shown in brackets [Description Here]
   \item \textbf{RESOLUTION} (12 chars width): Monitor resolution at
     save time (e.g., "1920x1080")
   \item \textbf{ICONS} (5 chars width): Number of icons in the
@@ -728,7 +749,7 @@ Description: Work Setup Final
 Timestamp: 2024-12-11T14:30:15.123456
 \end{verbatim}
 
-\subsubsection{Available Operations}
+\--subsubsection{Available Operations}
 
 \textbf{Restore Operations}:
 \begin{itemize}
@@ -767,7 +788,7 @@ state with the selected backup before proceeding with the restore operation.
   If the "Enable Adaptive Scaling" setting is active, the system will
   automatically
   calculate the scaling factors if it detects a resolution mismatch during this
-  comparison phase[cite: 161, 162].
+  c-omparison phase[cite: 161, 162].
 \end{infobox}
 
 \textbf{Selection Behavior}:
@@ -863,8 +884,6 @@ Example: 20241211_143015.json
 
 \section{System Tray Integration}
 
-\subsection{System Tray Context Menu}
-
 Right-click on the system tray icon to access quick functions:
 
 \begin{itemize}
@@ -882,6 +901,15 @@ Right-click on the system tray icon to access quick functions:
   \item \textbf{Double-click}: Shows main window (same as "Show Window")
   \item \textbf{Single-click}: No action (prevents accidental triggers)
   \item \textbf{Right-click}: Opens context menu
+\end{itemize}
+
+\textbf{Advanced Interaction}:
+Beyond the menu, the tray icon supports direct mouse actions:
+\begin{itemize}
+  \item \textbf{Double-click}: Toggles the visibility of the main
+    window (Show/Hide).
+  \item \textbf{Single-click}: Reserved for future use (no action to
+    prevent accidental triggers).
 \end{itemize}
 
 \subsection{Tray Notifications}
@@ -917,6 +945,12 @@ The program displays system tray notifications for important events:
     \textbf{Shortcut} & \textbf{Action} & \textbf{Description} \\
     \hline
     \texttt{Ctrl+S} & Quick Save & Saves current layout with optional tag \\
+    \hline
+    \texttt{Ctrl+M} & Backup Manager & Opens the advanced management window \\
+    \hline
+    \texttt{Ctrl+,} & Settings & Opens the settings and preferences dialog \\
+    \hline
+    \texttt{Ctrl+H / F1} & User Manual & Opens this documentation \\
     \hline
     \texttt{Ctrl+Q} & Exit Application & Closes program completely \\
     \hline
