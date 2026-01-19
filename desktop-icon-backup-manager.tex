@@ -210,20 +210,20 @@ On first run, the program automatically:
 \end{warningbox}
 
 \section{Command Line Interface (CLI)}
-The application can be operated via terminal for automation and
-scripting without using the graphical interface.
+The application supports advanced automation through CLI arguments.
 
-\begin{description}[style=nextline]
-  \item[\texttt{--save}] Performs an immediate backup with the tag
-    "CLI Quick Save" and exits.
-  \item[\texttt{--restore <filename>}] Restores icons from the
-    specified JSON file.
-  \item[\texttt{--latest}] Combined with \texttt{--restore}, it
-    automatically selects the most recent backup.
-  \item[\texttt{--silent}] Runs the operation in the background
-    without showing any windows or taskbar icons.
-  \item[\texttt{--enable-scaling}] Forces coordinate scaling if a
-    resolution mismatch is detected during CLI restore.
+\begin{description}
+  \item[\texttt{--backup}] Creates a new backup of the current
+    desktop icon layout and exits.
+  \item[\texttt{--restore <filename|latest>}] Restores the specified
+    backup file. Use \texttt{latest} to automatically pick the most recent save.
+  \item[\texttt{--list}] Displays a numbered list of all available
+    backups in the terminal.
+  \item[\texttt{--scaling}] Enables DPI awareness during restoration.
+    Use this if the backup was created on a different monitor or with
+    different display scaling settings.
+  \item[\texttt{--silent}] Runs the operation without displaying GUI
+    message boxes (useful for scheduled tasks).
 \end{description}
 
 \begin{infobox}[Example CLI Usage]
