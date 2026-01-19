@@ -134,7 +134,9 @@ different resolutions, and complete automation through configurable settings.
   \item \textbf{Backup Management}: Dedicated interface with search
     filtering to select, restore, or delete specific backups
   \item \textbf{Visual Preview}: Mini-map display of icon layouts
-    before restoring
+    before restoring with interactive tooltips
+  \item \textbf{Backup Comparison}: Compare two backups to see
+    exactly what changed
   \item \textbf{Adaptive Scaling}: Automatic adjustment of icon
     positions across different resolutions
   \item \textbf{Automatic Cleanup}: Configurable limit on the number
@@ -210,6 +212,7 @@ On first run, the program automatically:
 \end{warningbox}
 
 \section{Command Line Interface (CLI)}
+
 The application supports advanced automation through CLI arguments.
 
 \begin{description}
@@ -217,18 +220,56 @@ The application supports advanced automation through CLI arguments.
     desktop icon layout and exits.
   \item[\texttt{--restore <filename|latest>}] Restores the specified
     backup file. Use \texttt{latest} to automatically pick the most recent save.
-  \item[\texttt{--list}] Displays a numbered list of all available
-    backups in the terminal.
-  \item[\texttt{--scaling}] Enables DPI awareness during restoration.
-    Use this if the backup was created on a different monitor or with
-    different display scaling settings.
   \item[\texttt{--silent}] Runs the operation without displaying GUI
     message boxes (useful for scheduled tasks).
 \end{description}
 
 \begin{infobox}[Example CLI Usage]
-  \texttt{python desktop-icon-backup-manager.py --restore --latest --silent}
+  \texttt{desktop-icon-backup-manager.exe --backup --silent}
+
+  \texttt{desktop-icon-backup-manager.exe --restore latest --silent}
 \end{infobox}
+
+\subsection{Technical Implementation Details}
+
+The CLI integration is designed to be fully compatible with the
+existing infrastructure:
+
+\begin{itemize}
+  \item \textbf{Configuration Inheritance}: The CLI mode
+    automatically loads the \texttt{settings.ini} file. This ensures
+    that features like \textit{Adaptive Scaling} and \textit{Cleanup
+    Limits} are applied even when running without a GUI.
+  \item \textbf{Exit Codes}:
+    \begin{itemize}
+      \item \texttt{0}: Operation completed successfully.
+      \item \texttt{1}: An error occurred (e.g., file not found or
+        permission denied).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Automation and Exit Codes}
+For advanced users and scripting:
+\begin{itemize}
+  \item \textbf{Silent Mode}: The \texttt{--silent} flag suppresses
+    all GUI dialogs, making it suitable for scheduled tasks.
+  \item \textbf{Standard Exit Codes}:
+    \begin{itemize}
+      \item \texttt{0}: Operation completed successfully.
+      \item \texttt{1}: Critical error (e.g., no backups found or
+        permission denied).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Example Batch Script}
+
+You can create a \texttt{.bat} file to automate your backup on
+Windows startup or via Task Scheduler:
+
+\begin{verbatim}
+@echo off
+start "" "desktop-icon-backup-manager.exe" --backup --silent
+\end{verbatim}
 
 \section{Main Interface}
 
@@ -273,6 +314,19 @@ above the button for easier identification later.
   \item Forces desktop refresh to ensure visual consistency
   \item Re-enables UI and displays completion message
 \end{enumerate}
+
+\begin{infobox}[Technical Data Structure]
+  The backup system captures a comprehensive snapshot of the desktop
+  environment:
+  \begin{itemize}
+    \item \textbf{Display Metadata}: Saves monitor count, screen
+      names, resolutions, and \texttt{devicePixelRatio}.
+    \item \textbf{JSON Schema}: Includes \texttt{icon\_count}, ISO
+      \texttt{timestamp}, \texttt{description}, and exact X/Y coordinates.
+    \item \textbf{Coordinate Precision}: Positions are retrieved via
+      Windows API (\texttt{LVM\_GETITEMPOSITION}).
+  \end{itemize}
+\end{infobox}
 
 \textbf{Example Log Output}:
 \begin{verbatim}
@@ -330,7 +384,8 @@ Opens the comprehensive backup management window that provides:
     before restoring, with interactive tooltips for icon identification
   \item \textbf{Detailed Information}: Extended metadata display for
     selected backup
-  \item \textbf{Context Menu}: Right-click for quick restore or delete actions
+  \item \textbf{Context Menu}: Right-click for quick restore,
+    compare, or delete actions
   \item \textbf{Batch Operations}: Select and delete multiple backups
 \end{itemize}
 
@@ -343,7 +398,7 @@ icons across the available screen area, creating a chaotic but fun layout.
 
 \begin{warningbox}[Mandatory Pre-Scramble Backup]
   Before scrambling, an automatic backup is \textbf{always} created
-  with the tag "Auto-Backup before Scramble (Random)". This ensures
+  with the tag "\textbf{Backup before Scramble}". This ensures
   you can always restore the previous layout. The scramble operation
   will abort if this backup fails.
 \end{warningbox}
@@ -547,14 +602,7 @@ $$y_{\text{new}} = \lfloor y_{\text{saved}} \times \text{scale}_y \rfloor$$
 
 \textbf{When Scaling Is Active}:
 \begin{verbatim}
-[14:45:20] Adaptive Scaling enabled: Saved 1920x1080 -> Current 2560x1440
-[14:45:20]   **[SCALING APPLIED]** Scaling factors: X=1.333, Y=1.333
-\end{verbatim}
-
-\textbf{When Scaling Is Skipped}:
-\begin{verbatim}
-[14:45:20] Adaptive Scaling enabled, but resolutions match or are invalid.
-           Scaling skipped.
+[14:45:20] Adaptive Scaling enabled: X=1.333, Y=1.333
 \end{verbatim}
 
 \textbf{When Scaling Is Disabled}:
@@ -634,6 +682,29 @@ automatically deleted.
   \end{itemize}
 \end{infobox}
 
+\subsection{Window Position and Size Persistence}
+
+The application automatically remembers your window position and size:
+
+\begin{itemize}
+  \item Window geometry saved when closing normally
+  \item Saved to \texttt{settings.ini} under \texttt{[MainWindow]/geometry}
+  \item Automatically restored on next startup
+  \item Default position: 100,100 with size 800×650 pixels
+  \item Works independently of "Minimize to Tray" setting
+\end{itemize}
+
+\textbf{Format in settings.ini}:
+\begin{verbatim}
+[MainWindow]
+geometry=@Rect(100 100 800 650)
+\end{verbatim}
+
+\begin{infobox}[Note]
+  If the saved position is off-screen (e.g., after monitor disconnection),
+  Qt automatically repositions the window to visible area.
+\end{infobox}
+
 \section{Advanced Backup Management}
 
 \subsection{Backup Manager Window}
@@ -669,12 +740,12 @@ The list displays backups in a monospaced font (Consolas) for perfect
 column alignment:
 
 \begin{enumerate}
-  \item \textbf{TAG/DESCRIPTION} (40 chars width): User-provided
-    description, truncated with "..." if longer than 38 characters,
-    -    shown in brackets [Description Here]
-  \item \textbf{RESOLUTION} (12 chars width): Monitor resolution at
+  \item \textbf{TAG/DESCRIPTION} (55 chars width): User-provided
+    description, truncated with "..." if longer, shown in brackets
+    [Description Here]
+  \item \textbf{RESOLUTION} (14 chars width): Monitor resolution at
     save time (e.g., "1920x1080")
-  \item \textbf{ICONS} (5 chars width): Number of icons in the
+  \item \textbf{ICONS} (6 chars width): Number of icons in the
     backup, right-aligned
   \item \textbf{TIMESTAMP} (variable width): Human-readable date/time
     in format "YYYY/MM/DD HH:MM:SS"
@@ -682,11 +753,11 @@ column alignment:
 
 \textbf{Example List Display}:
 \begin{verbatim}
-TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
-[Work Setup Final]         | 1920x1080     |    12 | 2024/12/11 14:30:15
-[Gaming Layout]            | 2560x1440     |    18 | 2024/12/10 22:15:00
-[Clean Desktop]            | 1920x1080     |     5 | 2024/12/09 09:00:00
-[Auto-Save on Exit]        | 1920x1080     |    12 | 2024/12/08 18:45:30
+TAG/DESCRIPTION                   | RESOLUTION    | ICONS | TIMESTAMP
+[Work Setup Final]                | 1920x1080     |    12 | 2024/12/11 14:30:15
+[Gaming Layout]                   | 2560x1440     |    18 | 2024/12/10 22:15:00
+[Clean Desktop]                   | 1920x1080     |     5 | 2024/12/09 09:00:00
+[Auto-Save on Exit]               | 1920x1080     |    12 | 2024/12/08 18:45:30
 \end{verbatim}
 
 \subsubsection{Visual Preview Panel}
@@ -696,8 +767,8 @@ TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
 \textbf{Features}:
 \begin{itemize}
   \item Dark background (\#1a1a1a) with subtle border
-  \item Icons displayed as blue dots (\#0078d7, 3px thickness)
-  \item Automatic scaling to fit preview area
+  \item Icons displayed as blue dots (\#0078d7, 8px diameter)
+  \item Automatic scaling to fit preview area (450×250 pixels)
   \item Updates dynamically when selecting different backups
   \item Shows "No Preview Available" when no backup is selected
 \end{itemize}
@@ -708,27 +779,41 @@ TAG/DESCRIPTION            | RESOLUTION    | ICONS | TIMESTAMP
   \item Scale X = Preview Width / Saved Width
   \item Scale Y = Preview Height / Saved Height
   \item Each icon position is multiplied by scale factors
-  \item Positions are clamped to preview boundaries
+  \item Positions are clamped to preview boundaries (5px margin)
+\end{itemize}
+
+\begin{itemize}
+  \item \textbf{Dynamic Scaling}: The preview automatically scales
+    coordinates to fit the 450x250 pixel area while maintaining aspect ratio.
+  \item \textbf{Interactive Tooltips}: Hovering over icon points
+    displays a tooltip with the specific icon name via \texttt{QToolTip}.
 \end{itemize}
 
 \subsubsection{Interactive Tooltip Preview}
 
 \textbf{Location}: Integrated within the Visual Preview Panel
 
-\textbf{New Feature}:
-The preview panel now features an interactive tooltip system that
+The preview panel features an interactive tooltip system that
 identifies icons as you hover over them with the mouse.
 
+\textbf{Technical Implementation}:
 \begin{itemize}
-  \item {Dynamic Identification}: Hovering over any blue dot
-    (representing an icon) in the preview area will instantly display
-    the icon's name.
-  \item {Enhanced Precision}: The tooltip appears exactly at the
-    mouse position, making it easy to identify specific icons in
-    crowded layouts.
-  \item {Real-time Feedback}: The system updates as you move the
-    cursor across the mini-map, providing immediate visual
-    confirmation of the backup content.
+  \item Mouse tracking enabled on preview widget with
+    \texttt{setMouseTracking(True)}
+  \item Hover detection uses distance calculation: $\sqrt{(dx)^2 +
+    (dy)^2} < 12$ pixels
+  \item Icon names displayed via \texttt{QToolTip.showText()} at cursor position
+  \item Real-time update as mouse moves across preview
+  \item Automatic tooltip hiding when cursor leaves icon proximity
+  \item Coordinate scaling matches preview transformation
+\end{itemize}
+
+\textbf{Visual Styling}:
+\begin{itemize}
+  \item Black text on light yellow background (\#ffffdc)
+  \item Segoe UI font, 12px size
+  \item 1px black border for visibility
+  \item Follows cursor movement smoothly
 \end{itemize}
 
 \begin{infobox}[Pro Tip]
@@ -746,7 +831,8 @@ File: 1920x1080_20241211_143015.json
 Icons: 12
 Resolution: 1920x1080
 Description: Work Setup Final
-Timestamp: 2024-12-11T14:30:15.123456
+Timestamp: 2024-12-11T14:30:15.
+
 \end{verbatim}
 
 \--subsubsection{Available Operations}
@@ -775,20 +861,20 @@ state with the selected backup before proceeding with the restore operation.
 \begin{itemize}
   \item \textbf{Resolution Check}: Compares current screen resolution
     with the resolution
-    stored in the backup[cite: 13, 140].
+    stored in the backup.
   \item \textbf{Icon Count}: Displays the total number of icons in
     the backup versus
-    the current icons found on the desktop[cite: 140, 141].
+    the current icons found on the desktop.
   \item \textbf{Metadata Validation}: Shows the exact timestamp
     (YYYY/MM/DD HH:MM:SS)
-    and optional descriptive tags of the latest file[cite: 13, 140].
+    and optional descriptive tags of the latest file.
 \end{itemize}
 
 \begin{infobox}[Safety Verification]
   If the "Enable Adaptive Scaling" setting is active, the system will
   automatically
   calculate the scaling factors if it detects a resolution mismatch during this
-  c-omparison phase[cite: 161, 162].
+  c-omparison phase.
 \end{infobox}
 
 \textbf{Selection Behavior}:
@@ -826,6 +912,17 @@ Example: 20241211_143015.json
   The program can read and restore from both modern and legacy
   formats. Legacy files show "N/A" for resolution in the Backup Manager.
 \end{infobox}
+
+\subsubsection{Smart Filename Parsing}
+The application features a robust parsing engine for backup identification:
+\begin{itemize}
+  \item \textbf{Format Recognition}: Automatically distinguishes
+    between the modern format (\texttt{Resolution\_Date\_Time.json})
+    and the legacy format (\texttt{Date\_Time.json}).
+  \item \textbf{Fallback System}: If a filename doesn't match
+    standard patterns, the manager uses the raw filename as a
+    fallback to ensure visibility in the list.
+\end{itemize}
 
 \subsubsection{JSON File Structure (Complete)}
 
@@ -995,6 +1092,18 @@ Displays program information including:
 \end{itemize}
 
 \section{Troubleshooting}
+
+\subsection{System Interaction and Permissions}
+\begin{warningbox}[Technical Requirements]
+  \begin{itemize}
+    \item \textbf{Memory Access}: The program uses
+      \texttt{OpenProcess} and \texttt{VirtualAllocEx} to interact
+      with \texttt{Explorer.exe} memory.
+    \item \textbf{ListView Visibility}: If icons are hidden, the
+      program cannot access positions, resulting in the
+      \textit{"Unable to find desktop ListView control"} error.
+  \end{itemize}
+\end{warningbox}
 
 \subsection{Common Issues}
 
@@ -1758,7 +1867,7 @@ To read icon positions, the program:
 \section{License and Credits}
 
 \subsection{Developer}
-\textbf{mapi*68}
+\textbf{mapi68}
 
 \subsection{Libraries Used}
 \begin{itemize}
