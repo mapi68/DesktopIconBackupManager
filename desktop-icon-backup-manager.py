@@ -1,4 +1,5 @@
 import argparse
+import argparse
 import ctypes
 import json
 import os
@@ -57,6 +58,7 @@ from PyQt6.QtGui import (
     QIcon,
     QPainter,
     QColor,
+    QCursor,
     QPen,
     QDesktopServices,
 )
@@ -203,8 +205,7 @@ class IconPreviewWidget(QWidget):
         self.icons = {}
         self.screen_res = (1920, 1080)
         self.setMouseTracking(True)
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QWidget {
                 background-color: #1a1a1a;
                 border: 2px solid #333;
@@ -217,8 +218,7 @@ class IconPreviewWidget(QWidget):
                 font-family: 'Segoe UI';
                 font-size: 12px;
             }
-        """
-        )
+        """)
 
     def update_preview(self, icons: Dict, res_tuple: Tuple[int, int]):
         self.icons = icons
@@ -1298,8 +1298,7 @@ class BackupManagerWindow(QDialog):
             dialog.setWindowTitle(self.tr("Comparison Results"))
             dialog.resize(650, 550)
 
-            dialog.setStyleSheet(
-                """
+            dialog.setStyleSheet("""
                 QDialog {
                     background-color: #1e1e1e;
                 }
@@ -1339,8 +1338,7 @@ class BackupManagerWindow(QDialog):
                 QPushButton:pressed {
                     background-color: #0d5a8f;
                 }
-            """
-            )
+            """)
 
             layout = QVBoxLayout(dialog)
             layout.setSpacing(10)
@@ -1503,6 +1501,10 @@ class MainWindow(QMainWindow):
 
         settings_menu = menu_bar.addMenu(self.tr("&Settings"))
 
+        action_open_settings = QAction(self.tr("Open Settings Menu"), self)
+        action_open_settings.setShortcut(QKeySequence("Ctrl+,"))
+        action_open_settings.triggered.connect(self.show_settings_menu)
+
         self.action_start_minimized = QAction(
             self.tr("Start Minimized to Tray"), self, checkable=True
         )
@@ -1574,12 +1576,15 @@ class MainWindow(QMainWindow):
         help_menu = menu_bar.addMenu(self.tr("&Help"))
 
         action_manual = QAction(self.tr("Online User Manual"), self)
-        action_manual.triggered.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf")
-            )
-        )
+        action_manual.setShortcut(QKeySequence("Ctrl+H"))
+        action_manual.triggered.connect(self.open_online_manual)
         help_menu.addAction(action_manual)
+
+        help_menu.addSeparator()
+
+        action_shortcuts = QAction(self.tr("Keyboard Shortcuts"), self)
+        action_shortcuts.triggered.connect(self.show_shortcuts_dialog)
+        help_menu.addAction(action_shortcuts)
 
         help_menu.addSeparator()
 
@@ -1611,11 +1616,13 @@ class MainWindow(QMainWindow):
 
         self.btn_save_latest = QPushButton(self.tr("💾 SAVE QUICK BACKUP"))
         self.btn_save_latest.setMinimumHeight(50)
+
         self.btn_save_latest.setToolTip(
             self.tr(
-                "Save current desktop icon positions to a new file, using the tag above."
+                "Save current desktop icon positions to a new file, using the tag above.\n\nShortcut: Ctrl+S"
             )
         )
+
         self.btn_save_latest.clicked.connect(self.quick_save_with_tag)
         self.btn_save_latest.setObjectName("saveButton")
 
@@ -1629,11 +1636,13 @@ class MainWindow(QMainWindow):
 
         self.btn_restore_select = QPushButton(self.tr("↺ BACKUP MANAGER"))
         self.btn_restore_select.setMinimumHeight(50)
+
         self.btn_restore_select.setToolTip(
             self.tr(
-                "Opens a window to select a specific backup file to restore or delete."
+                "Opens a window to select a specific backup file to restore or delete.\n\nShortcut: Ctrl+M"
             )
         )
+
         self.btn_restore_select.clicked.connect(self.open_backup_manager)
         self.btn_restore_select.setObjectName("backupManagerButton")
 
@@ -1668,8 +1677,7 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(log_button_layout)
 
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QPushButton[objectName="saveButton"],
             QPushButton[objectName="restoreButton"],
             QPushButton[objectName="backupManagerButton"],
@@ -1688,16 +1696,69 @@ class MainWindow(QMainWindow):
             QTextEdit { border: 1px solid #ddd; border-radius: 4px; padding: 5px; font-family: 'Consolas', monospace; font-size: 11px; }
             QProgressBar { border: 1px solid #ddd; border-radius: 4px; text-align: center; height: 20px; }
             QProgressBar::chunk { background-color: #0078D7; border-radius: 3px; }
-        """
+        """)
+
+    def show_settings_menu(self):
+        menu_bar = self.menuBar()
+        settings_menu = None
+
+        for action in menu_bar.actions():
+            if action.text() == self.tr("&Settings"):
+                settings_menu = action.menu()
+                break
+
+        if settings_menu:
+            cursor_pos = QCursor.pos()
+            settings_menu.exec(cursor_pos)
+        else:
+            self.log(self.tr("Settings menu not found"))
+
+    def open_online_manual(self):
+        manual_url = QUrl(
+            "https://mapi68.github.io/desktop-icon-backup-manager/manual.pdf"
         )
+        success = QDesktopServices.openUrl(manual_url)
+
+        if success:
+            self.log(self.tr("Opening online user manual in browser..."))
+        else:
+            self.log(self.tr("✗ Failed to open manual URL"))
+            QMessageBox.warning(
+                self,
+                self.tr("Error"),
+                self.tr(
+                    "Could not open the online manual.\n\nPlease visit manually:\n%1"
+                ).replace("%1", manual_url.toString()),
+            )
 
     def setup_shortcuts(self):
+
         save_shortcut = QAction(self.tr("Save"), self)
         save_shortcut.setShortcut(QKeySequence("Ctrl+S"))
         save_shortcut.triggered.connect(
             lambda: self.start_save(description=self.tr("Quick Backup (Shortcut)"))
         )
         self.addAction(save_shortcut)
+
+        manager_shortcut = QAction(self.tr("Backup Manager"), self)
+        manager_shortcut.setShortcut(QKeySequence("Ctrl+M"))
+        manager_shortcut.triggered.connect(self.open_backup_manager)
+        self.addAction(manager_shortcut)
+
+        settings_shortcut = QAction(self.tr("Settings"), self)
+        settings_shortcut.setShortcut(QKeySequence("Ctrl+,"))
+        settings_shortcut.triggered.connect(self.show_settings_menu)
+        self.addAction(settings_shortcut)
+
+        help_shortcut = QAction(self.tr("Help"), self)
+        help_shortcut.setShortcut(QKeySequence("Ctrl+H"))
+        help_shortcut.triggered.connect(self.open_online_manual)
+        self.addAction(help_shortcut)
+
+        help_f1_shortcut = QAction(self.tr("Help F1"), self)
+        help_f1_shortcut.setShortcut(QKeySequence("F1"))
+        help_f1_shortcut.triggered.connect(self.open_online_manual)
+        self.addAction(help_f1_shortcut)
 
     def load_settings(self):
         self.action_start_minimized.setChecked(
@@ -2110,6 +2171,57 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
         QApplication.quit()
+
+    def show_shortcuts_dialog(self):
+        shortcuts_text = f"""
+        <h2>{self.tr("Keyboard Shortcuts")}</h2>
+        <table style='width:100%; border-collapse: collapse;'>
+            <tr style='background-color: #db2db2;'>
+                <th style='padding: 8px; text-align: left; border: 1px solid #ddd;'>{self.tr("Shortcut")}</th>
+                <th style='padding: 8px; text-align: left; border: 1px solid #ddd;'>{self.tr("Action")}</th>
+            </tr>
+            <tr>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+S</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Quick Save current layout")}</td>
+            </tr>
+            <tr style='background-color: #db2d2d;'>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+M</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Open Backup Manager")}</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+,</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Open Settings menu")}</td>
+            </tr>
+            <tr style='background-color: #db2d2d;'>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+H</b> or <b>F1</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Open Online User Manual")}</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+Q</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Exit Application")}</td>
+            </tr>
+        </table>
+        <br>
+        <p style='color: #666; font-size: 11px;'>{self.tr("Tip: Hover over buttons to see additional shortcuts in tooltips.")}</p>
+        """
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.tr("Keyboard Shortcuts"))
+        dialog.setMinimumWidth(380)
+        dialog.setMinimumHeight(300)
+
+        layout = QVBoxLayout(dialog)
+
+        text_browser = QTextEdit()
+        text_browser.setReadOnly(True)
+        text_browser.setHtml(shortcuts_text)
+        layout.addWidget(text_browser)
+
+        btn_close = QPushButton(self.tr("Close"))
+        btn_close.clicked.connect(dialog.accept)
+        layout.addWidget(btn_close)
+
+        dialog.exec()
 
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@
 \usepackage{parskip}
 \usepackage{needspace}
 
+\DeclareUnicodeCharacter{2194}{\ensuremath{\leftrightarrow}}
+
 % Page setup
 \geometry{margin=2.5cm}
 \setlength{\headheight}{13.6pt}
@@ -857,18 +859,55 @@ The application includes an intelligent verification system that
 compares current desktop
 state with the selected backup before proceeding with the restore operation.
 
-\textbf{Information Displayed for Comparison:}
-\begin{itemize}
-  \item \textbf{Resolution Check}: Compares current screen resolution
-    with the resolution
-    stored in the backup.
-  \item \textbf{Icon Count}: Displays the total number of icons in
-    the backup versus
-    the current icons found on the desktop.
-  \item \textbf{Metadata Validation}: Shows the exact timestamp
-    (YYYY/MM/DD HH:MM:SS)
-    and optional descriptive tags of the latest file.
-\end{itemize}
+\subsubsection{Backup Comparison Technical Details}
+
+The comparison engine (\texttt{BackupComparator.compare()}) performs:
+
+\begin{enumerate}
+  \item \textbf{Set Operations}:
+    \begin{itemize}
+      \item Added icons: \texttt{names2 - names1} (set difference)
+      \item Removed icons: \texttt{names1 - names2}
+      \item Common icons: \texttt{names1 \& names2} (intersection)
+    \end{itemize}
+
+  \item \textbf{Position Comparison}:
+    \begin{itemize}
+      \item For each common icon, compares \texttt{pos1 != pos2}
+      \item Moved icons list generated from position mismatches
+    \end{itemize}
+
+  \item \textbf{Report Generation}:
+    \begin{itemize}
+      \item Color-coded HTML output via
+        \texttt{\_colorize\_comparison\_report()}
+      \item Green (\#4ec9b0) for added icons (+ prefix)
+      \item Red (\#f48771) for removed icons (- prefix)
+      \item Yellow (\#dcdcaa) for moved icons (↔ prefix)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Example Comparison Output}:
+\begin{verbatim}
+=== COMPARISON RESULTS ===
+
+Icon(s) Added: 2
+Icon(s) Removed: 1
+Icon(s) Moved: 3
+Icon(s) Unchanged: 8
+
+--- ADDED ICONS ---
+  + New Shortcut.lnk
+  + Project Folder
+
+--- REMOVED ICONS ---
+  - Old File.txt
+
+--- MOVED ICONS ---
+  ↔ Documents
+  ↔ Downloads
+  ↔ Pictures
+\end{verbatim}
 
 \begin{infobox}[Safety Verification]
   If the "Enable Adaptive Scaling" setting is active, the system will
@@ -1035,6 +1074,8 @@ The program displays system tray notifications for important events:
 
 \section{Keyboard Shortcuts}
 
+\section{Keyboard Shortcuts}
+
 \begin{table}[H]
   \centering
   \begin{tabular}{|l|l|p{7cm}|}
@@ -1043,17 +1084,19 @@ The program displays system tray notifications for important events:
     \hline
     \texttt{Ctrl+S} & Quick Save & Saves current layout with optional tag \\
     \hline
-    \texttt{Ctrl+M} & Backup Manager & Opens the advanced management window \\
-    \hline
-    \texttt{Ctrl+,} & Settings & Opens the settings and preferences dialog \\
-    \hline
-    \texttt{Ctrl+H / F1} & User Manual & Opens this documentation \\
-    \hline
-    \texttt{Ctrl+Q} & Exit Application & Closes program completely \\
+    \texttt{Ctrl+Q} & Exit Application & Closes program completely
+    (via File menu) \\
     \hline
   \end{tabular}
   \caption{Available keyboard shortcuts}
 \end{table}
+
+\begin{warningbox}[Note]
+  Currently, only Ctrl+S is implemented as a global shortcut. Ctrl+Q
+  works through the File menu action. Other shortcuts listed in
+  previous versions (Ctrl+M, Ctrl+,, Ctrl+H/F1) are not currently
+  active in the codebase.
+\end{warningbox}
 
 \begin{infobox}[Future Enhancements]
   Additional keyboard shortcuts may be added in future versions based
@@ -1638,26 +1681,57 @@ win32api.SendMessage(
 
 \subsection{Settings Storage}
 
-Configuration stored in INI format for human readability:
+The application stores all configuration in a human-readable INI file
+located in the program directory.
 
-\textbf{settings.ini Location}:
+\subsubsection{Settings File Location}
+
+The program determines the settings file path dynamically based on
+execution context:
+
 \begin{verbatim}
-[Application Directory]/settings.ini
+app_path = Path(os.path.abspath(sys.argv[0])).parent
+settings_file_path = app_path / "settings.ini"
 \end{verbatim}
 
-\textbf{Stored Settings}:
-\begin{verbatim}
-[MainWindow]
-geometry=@Rect(100 100 650 600)  # Window position and size
+\textbf{Location Behavior}:
+\begin{itemize}
+  \item \textbf{Standalone Executable}: Settings saved next to the .exe file
+  \item \textbf{Python Script}: Settings saved in the script's directory
+  \item Format: Qt INI format (\texttt{QSettings.Format.IniFormat})
+  \item Encoding: UTF-8 with automatic escaping for special characters
+\end{itemize}
 
-[Settings]
+\subsubsection{Complete Settings Structure}
+
+\begin{verbatim}
+[General]
 start_minimized=false
-auto_save_on_exit=true
+auto_save_on_exit=false
 auto_restore_on_startup=false
-adaptive_scaling_enabled=true
+adaptive_scaling_enabled=false
 close_to_tray=false
-cleanup_limit=10
+cleanup_limit=0
+geometry=@Rect(100 100 800 650)
 \end{verbatim}
+
+\textbf{Settings Explanation}:
+\begin{description}
+  \item[\texttt{start\_minimized}] Launch application hidden in system tray
+  \item[\texttt{auto\_save\_on\_exit}] Automatically backup layout when closing
+  \item[\texttt{auto\_restore\_on\_startup}] Restore latest backup on launch
+  \item[\texttt{adaptive\_scaling\_enabled}] Enable resolution
+    scaling during restore
+  \item[\texttt{close\_to\_tray}] Minimize to tray when clicking X button
+  \item[\texttt{cleanup\_limit}] Maximum backup files to retain (0 = unlimited)
+  \item[\texttt{geometry}] Window position and size in Qt rect format
+\end{description}
+
+\begin{infobox}[Manual Configuration]
+  Advanced users can edit \texttt{settings.ini} directly with any text editor.
+  Changes take effect on next program launch. Invalid values are automatically
+  reset to defaults.
+\end{infobox}
 
 \subsection{Security and Privacy}
 
