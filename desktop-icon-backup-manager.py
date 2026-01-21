@@ -2207,8 +2207,8 @@ class MainWindow(QMainWindow):
 
         dialog = QDialog(self)
         dialog.setWindowTitle(self.tr("Keyboard Shortcuts"))
-        dialog.setMinimumWidth(380)
-        dialog.setMinimumHeight(300)
+        dialog.setMinimumWidth(400)
+        dialog.setMinimumHeight(350)
 
         layout = QVBoxLayout(dialog)
 
