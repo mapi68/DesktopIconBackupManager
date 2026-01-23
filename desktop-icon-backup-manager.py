@@ -1,5 +1,4 @@
 import argparse
-import argparse
 import ctypes
 import json
 import os
@@ -1576,7 +1575,7 @@ class MainWindow(QMainWindow):
         help_menu = menu_bar.addMenu(self.tr("&Help"))
 
         action_manual = QAction(self.tr("Online User Manual"), self)
-        action_manual.setShortcut(QKeySequence("Ctrl+H"))
+        action_manual.setShortcut(QKeySequence("F1"))
         action_manual.triggered.connect(self.open_online_manual)
         help_menu.addAction(action_manual)
 
@@ -1749,16 +1748,6 @@ class MainWindow(QMainWindow):
         settings_shortcut.setShortcut(QKeySequence("Ctrl+,"))
         settings_shortcut.triggered.connect(self.show_settings_menu)
         self.addAction(settings_shortcut)
-
-        help_shortcut = QAction(self.tr("Help"), self)
-        help_shortcut.setShortcut(QKeySequence("Ctrl+H"))
-        help_shortcut.triggered.connect(self.open_online_manual)
-        self.addAction(help_shortcut)
-
-        help_f1_shortcut = QAction(self.tr("Help F1"), self)
-        help_f1_shortcut.setShortcut(QKeySequence("F1"))
-        help_f1_shortcut.triggered.connect(self.open_online_manual)
-        self.addAction(help_f1_shortcut)
 
     def load_settings(self):
         self.action_start_minimized.setChecked(
@@ -2193,7 +2182,7 @@ class MainWindow(QMainWindow):
                 <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Open Settings menu")}</td>
             </tr>
             <tr style='background-color: #db2d2d;'>
-                <td style='padding: 8px; border: 1px solid #ddd;'><b>Ctrl+H</b> or <b>F1</b></td>
+                <td style='padding: 8px; border: 1px solid #ddd;'><b>F1</b></td>
                 <td style='padding: 8px; border: 1px solid #ddd;'>{self.tr("Open Online User Manual")}</td>
             </tr>
             <tr>
