@@ -655,6 +655,13 @@ class DesktopIconManager:
         current_res = parse_resolution_string(current_res_str)
         saved_res = parse_resolution_string(resolution_saved)
 
+        if not enable_scaling and current_res != saved_res:
+            log_callback(
+                QCoreApplication.translate(
+                    "DesktopIconManager", "⚠ Warning: Resolution mismatch!"
+                )
+            )
+
         if enable_scaling and current_res and saved_res and current_res != saved_res:
             scale_x = current_res[0] / saved_res[0]
             scale_y = current_res[1] / saved_res[1]
