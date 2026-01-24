@@ -211,7 +211,3 @@ close_to_tray=true
   <em>Detailed view of the comparison interface</em>
   <br><br><br>
 </p>
-
----
-
-**Note**: This application directly interacts with Windows desktop icon positions. Always keep recent backups before making system changes.
