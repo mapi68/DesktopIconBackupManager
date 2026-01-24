@@ -251,6 +251,7 @@ existing infrastructure:
 \end{itemize}
 
 \subsection{Automation and Exit Codes}
+
 For advanced users and scripting:
 \begin{itemize}
   \item \textbf{Silent Mode}: The \texttt{--silent} flag suppresses
@@ -297,6 +298,7 @@ The main interface is divided into five main areas:
 \subsection{Main Action Buttons}
 
 \subsubsection{\texorpdfstring{\faSave}{}\ SAVE QUICK BACKUP}
+
 \textcolor{success}{\textbf{Color: Green | Shortcut: Ctrl+S}}
 
 Immediately saves current desktop icon positions to a new timestamped
@@ -341,6 +343,7 @@ above the button for easier identification later.
 \end{verbatim}
 
 \subsubsection{\texorpdfstring{\faUndo}{}\ RESTORE LATEST}
+
 \textcolor{danger}{\textbf{Color: Red}}
 
 Restores icon positions from the most recent backup file. Before
@@ -374,6 +377,7 @@ restoring, a detailed confirmation dialog displays complete backup information.
 \end{infobox}
 
 \subsubsection{\texorpdfstring{\faList}{}\ BACKUP MANAGER}
+
 \textcolor{primary}{\textbf{Color: Blue}}
 
 Opens the comprehensive backup management window that provides:
@@ -833,11 +837,10 @@ File: 1920x1080_20241211_143015.json
 Icons: 12
 Resolution: 1920x1080
 Description: Work Setup Final
-Timestamp: 2024-12-11T14:30:15.
-
+Timestamp: 2024-12-11T14:30:15
 \end{verbatim}
 
-\--subsubsection{Available Operations}
+\subsubsection{Available Operations}
 
 \textbf{Restore Operations}:
 \begin{itemize}
@@ -855,6 +858,7 @@ Timestamp: 2024-12-11T14:30:15.
 \end{itemize}
 
 \subsubsection{Comparison with Latest Backup}
+
 The application includes an intelligent verification system that
 compares current desktop
 state with the selected backup before proceeding with the restore operation.
@@ -947,12 +951,8 @@ Pattern: {YYYYMMDD}_{HHMMSS}.json
 Example: 20241211_143015.json
 \end{verbatim}
 
-\begin{infobox}[Backward Compatibility]
-  The program can read and restore from both modern and legacy
-  formats. Legacy files show "N/A" for resolution in the Backup Manager.
-\end{infobox}
-
 \subsubsection{Smart Filename Parsing}
+
 The application features a robust parsing engine for backup identification:
 \begin{itemize}
   \item \textbf{Format Recognition}: Automatically distinguishes
@@ -1127,6 +1127,7 @@ Displays program information including:
 \section{Troubleshooting}
 
 \subsection{System Interaction and Permissions}
+
 \begin{warningbox}[Technical Requirements]
   \begin{itemize}
     \item \textbf{Memory Access}: The program uses
@@ -1447,8 +1448,8 @@ desktop is active.
 
 \textbf{Q: Are backups portable between different computers?}
 
-A: Yes, JSON files can be copied between computers. However,
-positions may not be accurate if:
+A: Yes, JSON files can be copied between computers, but positions may
+not be accurate if:
 \begin{itemize}
   \item Screen resolutions differ (use adaptive scaling)
   \item Monitor configurations differ (different number or arrangement)
@@ -1931,9 +1932,11 @@ To read icon positions, the program:
 \section{License and Credits}
 
 \subsection{Developer}
+
 \textbf{mapi68}
 
 \subsection{Libraries Used}
+
 \begin{itemize}
     \item PyQt6 - The Qt Company (GPL/Commercial License)
     \item pywin32 - Python for Windows Extensions (PSF License)

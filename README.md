@@ -48,7 +48,7 @@ A powerful Windows application to save and restore your desktop icon positions w
 
 ## 📋 Requirements
 
-- Windows 10 or later
+- Windows 7 or higher (fully compatible with Windows 11)
 - Python 3.8+ (for running from source)
 - Desktop icons must be visible (not hidden)
 
@@ -75,12 +75,6 @@ A powerful Windows application to save and restore your desktop icon positions w
    ```bash
    python desktop-icon-backup-manager.py
    ```
-
-### Dependencies
-```
-PyQt6
-pywin32
-```
 
 ## 📖 Usage Guide
 
@@ -153,7 +147,10 @@ close_to_tray=true
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl+S` | Quick Save |
+| `Ctrl+M` | Open Backup Manager |
+| `Ctrl+,` | Open Settings menu |
 | `Ctrl+Q` | Exit Application |
+| `F1`     | Open Online User Manual |
 
 ## 🐛 Troubleshooting
 
@@ -171,24 +168,6 @@ close_to_tray=true
 - Enable "Adaptive Scaling" in Settings for automatic position adjustment
 - Note: Backup saves the configuration from the time it was created
 - Restoring with different monitor setup may require manual adjustments
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**mapi68**
 
 ## 🙏 Acknowledgments
 
