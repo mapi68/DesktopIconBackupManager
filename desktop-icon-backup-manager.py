@@ -2025,8 +2025,13 @@ class MainWindow(QMainWindow):
                     self.manager.hwnd_listview, win32con.WM_SETREDRAW, 1, 0
                 )
                 win32gui.InvalidateRect(self.manager.hwnd_listview, None, True)
-                win32api.SendMessage(
-                    win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "IconMetrics"
+                win32gui.SendMessageTimeout(
+                    win32con.HWND_BROADCAST,
+                    win32con.WM_SETTINGCHANGE,
+                    0,
+                    "IconMetrics",
+                    win32con.SMTO_ABORTIFHUNG,
+                    100  # timeout in ms
                 )
                 self.log(self.tr("Desktop refresh signal sent successfully."))
             except Exception as e:
