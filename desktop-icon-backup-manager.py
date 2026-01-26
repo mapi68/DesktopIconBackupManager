@@ -843,9 +843,20 @@ class DesktopIconManager:
         finally:
             win32gui.SendMessage(self.hwnd_listview, win32con.WM_SETREDRAW, 1, 0)
             win32gui.InvalidateRect(self.hwnd_listview, None, True)
-            win32api.SendMessage(
-                win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "IconMetrics"
-            )
+
+
+try:
+    win32gui.SendMessageTimeout(
+        win32con.HWND_BROADCAST,
+        win32con.WM_SETTINGCHANGE,
+        0,
+        0,
+        win32con.SMTO_ABORTIFHUNG,
+        100,
+        None,
+    )
+except Exception:
+    pass
 
 
 class BackupComparator:
@@ -987,6 +998,31 @@ class IconWorker(QThread):
                     self.description,
                     self.max_backup_count,
                 )
+
+                if success:
+                    self.log_signal.emit(self.tr("Forcing desktop refresh..."))
+                    try:
+                        win32gui.SendMessage(
+                            self.manager.hwnd_listview, win32con.WM_SETREDRAW, 1, 0
+                        )
+                        win32gui.InvalidateRect(self.manager.hwnd_listview, None, True)
+                        win32gui.SendMessageTimeout(
+                            win32con.HWND_BROADCAST,
+                            win32con.WM_SETTINGCHANGE,
+                            0,
+                            "IconMetrics",
+                            win32con.SMTO_ABORTIFHUNG,
+                            5000,
+                        )
+                        self.log_signal.emit(
+                            self.tr("Desktop refresh signal sent successfully.")
+                        )
+                    except Exception as e:
+                        self.log_signal.emit(
+                            self.tr(
+                                "Warning: Failed to send desktop refresh signals: %1"
+                            ).replace("%1", str(e))
+                        )
             elif self.mode == "restore":
                 success, metadata = self.manager.restore(
                     self.log_signal.emit,
@@ -2017,24 +2053,6 @@ class MainWindow(QMainWindow):
 
         if mode == "restore" and success:
             self._check_display_metadata(saved_metadata)
-
-        if mode == "save" and success:
-            self.log(self.tr("Forcing desktop refresh..."))
-            try:
-                win32gui.SendMessage(
-                    self.manager.hwnd_listview, win32con.WM_SETREDRAW, 1, 0
-                )
-                win32gui.InvalidateRect(self.manager.hwnd_listview, None, True)
-                win32api.SendMessage(
-                    win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, "IconMetrics"
-                )
-                self.log(self.tr("Desktop refresh signal sent successfully."))
-            except Exception as e:
-                self.log(
-                    self.tr(
-                        "Warning: Failed to send desktop refresh signals: %1"
-                    ).replace("%1", str(str(e)))
-                )
 
         self.toggle_buttons(True)
         self.show_progress(False)
