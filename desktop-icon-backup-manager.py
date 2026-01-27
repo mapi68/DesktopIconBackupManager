@@ -1,6 +1,7 @@
 import argparse
 import ctypes
 import json
+import logging
 import os
 import random
 import struct
@@ -62,10 +63,45 @@ from PyQt6.QtGui import (
     QDesktopServices,
 )
 
-BACKUP_DIR = "icon_backups"
-REMOTE_BUFFER_SIZE = 4096
-TEXT_BUFFER_OFFSET = 256
-TEXT_BUFFER_SIZE = 2048
+
+class Config:
+    """Centralized configuration for the application"""
+
+    # Backup settings
+    BACKUP_DIR = "icon_backups"
+    MAX_BACKUPS_DEFAULT = 10
+    VERSION_FILE = "version.txt"
+
+    # Win32 memory settings
+    REMOTE_BUFFER_SIZE = 4096
+    TEXT_BUFFER_OFFSET = 256
+    TEXT_BUFFER_SIZE = 2048
+
+    # UI dimensions
+    PREVIEW_WIDTH = 450
+    PREVIEW_HEIGHT = 250
+    DIALOG_MIN_WIDTH = 400
+    DIALOG_MIN_HEIGHT = 350
+    SHORTCUTS_DIALOG_MIN_WIDTH = 400
+    SHORTCUTS_DIALOG_MIN_HEIGHT = 350
+
+    # Icon preview
+    ICON_DOT_SIZE = 8
+    ICON_DOT_MARGIN = 5
+
+    # Colors
+    COLOR_BACKGROUND = "#1a1a1a"
+    COLOR_BORDER = "#333"
+    COLOR_TEXT_DIM = "#666"
+    COLOR_ICON_DOT = "#0078d7"
+    COLOR_TOOLTIP_BG = "#ffffdc"
+    COLOR_TOOLTIP_TEXT = "#000000"
+
+    # Tray notification duration (ms)
+    TRAY_NOTIFICATION_DURATION = 2000
+
+    # Application version (will be overridden from file)
+    VERSION = "0.0.0"
 
 
 def resource_path(relative_path: str) -> str:
@@ -77,14 +113,12 @@ def resource_path(relative_path: str) -> str:
 
 
 try:
-    v_path = resource_path("version.txt")
+    v_path = resource_path(Config.VERSION_FILE)
     if os.path.exists(v_path):
         with open(v_path, "r", encoding="utf-8") as f:
-            VERSION = f.read().strip()
-    else:
-        VERSION = "0.0.0"
+            Config.VERSION = f.read().strip()
 except Exception:
-    VERSION = "0.0.0"
+    Config.VERSION = "0.0.0"
 
 
 class Win32Constants:
@@ -200,23 +234,23 @@ def get_resolution_from_filename(filename: str) -> str:
 class IconPreviewWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(450, 250)
+        self.setFixedSize(Config.PREVIEW_WIDTH, Config.PREVIEW_HEIGHT)
         self.icons = {}
         self.screen_res = (1920, 1080)
         self.setMouseTracking(True)
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #1a1a1a;
-                border: 2px solid #333;
+        self.setStyleSheet(f"""
+            QWidget {{
+                background-color: {Config.COLOR_BACKGROUND};
+                border: 2px solid {Config.COLOR_BORDER};
                 border-radius: 4px;
-            }
-            QToolTip {
-                color: #000000;
-                background-color: #ffffdc;
-                border: 1px solid #000000;
+            }}
+            QToolTip {{
+                color: {Config.COLOR_TOOLTIP_TEXT};
+                background-color: {Config.COLOR_TOOLTIP_BG};
+                border: 1px solid {Config.COLOR_TOOLTIP_TEXT};
                 font-family: 'Segoe UI';
                 font-size: 12px;
-            }
+            }}
         """)
 
     def update_preview(self, icons: Dict, res_tuple: Tuple[int, int]):
@@ -228,7 +262,7 @@ class IconPreviewWidget(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         if not self.icons:
-            painter.setPen(QColor("#666"))
+            painter.setPen(QColor(Config.COLOR_TEXT_DIM))
             painter.drawText(
                 self.rect(),
                 Qt.AlignmentFlag.AlignCenter,
@@ -238,13 +272,20 @@ class IconPreviewWidget(QWidget):
         scale_x = self.width() / self.screen_res[0]
         scale_y = self.height() / self.screen_res[1]
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(QColor("#0078d7"))
+        painter.setBrush(QColor(Config.COLOR_ICON_DOT))
         for pos in self.icons.values():
             px = int(pos[0] * scale_x)
             py = int(pos[1] * scale_y)
-            px = max(5, min(px, self.width() - 5))
-            py = max(5, min(py, self.height() - 5))
-            painter.drawEllipse(px - 4, py - 4, 8, 8)
+            px = max(
+                Config.ICON_DOT_MARGIN, min(px, self.width() - Config.ICON_DOT_MARGIN)
+            )
+            py = max(
+                Config.ICON_DOT_MARGIN, min(py, self.height() - Config.ICON_DOT_MARGIN)
+            )
+            radius = Config.ICON_DOT_SIZE // 2
+            painter.drawEllipse(
+                px - radius, py - radius, Config.ICON_DOT_SIZE, Config.ICON_DOT_SIZE
+            )
 
     def mouseMoveEvent(self, event):
         if not self.icons:
@@ -272,7 +313,7 @@ class DesktopIconManager:
         self._ensure_backup_directory()
 
     def _ensure_backup_directory(self) -> None:
-        Path(BACKUP_DIR).mkdir(exist_ok=True)
+        Path(Config.BACKUP_DIR).mkdir(exist_ok=True)
 
     def _get_desktop_listview_hwnd(self) -> int:
         hwnd_progman = win32gui.FindWindow("Progman", None)
@@ -306,9 +347,9 @@ class DesktopIconManager:
         return hwnd_listview
 
     def _list_backup_files(self) -> List[str]:
-        if not os.path.exists(BACKUP_DIR):
+        if not os.path.exists(Config.BACKUP_DIR):
             return []
-        backup_files = [f for f in os.listdir(BACKUP_DIR) if f.endswith(".json")]
+        backup_files = [f for f in os.listdir(Config.BACKUP_DIR) if f.endswith(".json")]
         backup_files.sort(key=lambda f: parse_backup_filename(f)[2], reverse=True)
         return backup_files
 
@@ -320,13 +361,13 @@ class DesktopIconManager:
         return self._list_backup_files()
 
     def delete_backup(self, filename: str) -> bool:
-        filepath = os.path.join(BACKUP_DIR, filename)
+        filepath = os.path.join(Config.BACKUP_DIR, filename)
         if os.path.exists(filepath):
             try:
                 os.remove(filepath)
                 return True
             except Exception as e:
-                print(f"Error deleting file {filepath}: {e}")
+                logging.error(f"Error deleting file {filepath}: {e}")
                 return False
         return False
 
@@ -436,7 +477,7 @@ class DesktopIconManager:
     def _get_latest_backup_path(self) -> Optional[str]:
         latest_file = self.get_latest_backup_filename()
         if latest_file:
-            return os.path.join(BACKUP_DIR, latest_file)
+            return os.path.join(Config.BACKUP_DIR, latest_file)
         return None
 
     def save(
@@ -452,7 +493,7 @@ class DesktopIconManager:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         filename = f"{resolution}_{timestamp}.json"
-        filepath = os.path.join(BACKUP_DIR, filename)
+        filepath = os.path.join(Config.BACKUP_DIR, filename)
 
         icons = {}
         pid = win32process.GetWindowThreadProcessId(self.hwnd_listview)[1]
@@ -466,7 +507,7 @@ class DesktopIconManager:
             remote_memory = win32process.VirtualAllocEx(
                 process_handle,
                 0,
-                REMOTE_BUFFER_SIZE,
+                Config.REMOTE_BUFFER_SIZE,
                 Win32Constants.MEM_COMMIT,
                 Win32Constants.PAGE_READWRITE,
             )
@@ -500,7 +541,7 @@ class DesktopIconManager:
                 )
                 x, y = struct.unpack("ii", point_data)
 
-                text_buffer_remote = remote_memory + TEXT_BUFFER_OFFSET
+                text_buffer_remote = remote_memory + Config.TEXT_BUFFER_OFFSET
                 lvitem = LVITEMW()
                 lvitem.mask = 0x0001
                 lvitem.iItem = i
@@ -582,7 +623,7 @@ class DesktopIconManager:
     ) -> Tuple[bool, Optional[Dict]]:
 
         if filename:
-            filepath = os.path.join(BACKUP_DIR, filename)
+            filepath = os.path.join(Config.BACKUP_DIR, filename)
         else:
             filepath = self._get_latest_backup_path()
 
@@ -687,7 +728,7 @@ class DesktopIconManager:
             remote_memory = win32process.VirtualAllocEx(
                 process_handle,
                 0,
-                REMOTE_BUFFER_SIZE,
+                Config.REMOTE_BUFFER_SIZE,
                 Win32Constants.MEM_COMMIT,
                 Win32Constants.PAGE_READWRITE,
             )
@@ -697,7 +738,7 @@ class DesktopIconManager:
             )
             current_map = {}
 
-            text_buffer_remote = remote_memory + TEXT_BUFFER_OFFSET
+            text_buffer_remote = remote_memory + Config.TEXT_BUFFER_OFFSET
             for i in range(count):
                 if progress_callback:
                     progress_callback(int((i / (count * 2)) * 100))
@@ -1151,7 +1192,7 @@ class BackupManagerWindow(QDialog):
             readable_date, resolution, _ = parse_backup_filename(filename)
             description = ""
             icon_count = "N/A"
-            filepath = os.path.join(BACKUP_DIR, filename)
+            filepath = os.path.join(Config.BACKUP_DIR, filename)
             try:
                 with open(filepath, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -1175,7 +1216,7 @@ class BackupManagerWindow(QDialog):
             self.btn_restore.setEnabled(False)
             return
         filename = items[0].data(Qt.ItemDataRole.UserRole)
-        filepath = os.path.join(BACKUP_DIR, filename)
+        filepath = os.path.join(Config.BACKUP_DIR, filename)
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -1239,7 +1280,7 @@ class BackupManagerWindow(QDialog):
         if not fn:
             return
 
-        filepath = os.path.join(BACKUP_DIR, fn)
+        filepath = os.path.join(Config.BACKUP_DIR, fn)
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -1330,8 +1371,8 @@ class BackupManagerWindow(QDialog):
             )
             return
 
-        file1 = os.path.join(BACKUP_DIR, selected_filename)
-        file2 = os.path.join(BACKUP_DIR, latest_filename)
+        file1 = os.path.join(Config.BACKUP_DIR, selected_filename)
+        file2 = os.path.join(Config.BACKUP_DIR, latest_filename)
 
         report = BackupComparator.compare(file1, file2)
 
@@ -1897,7 +1938,7 @@ class MainWindow(QMainWindow):
                 "</ul>"
                 "<p><b>Version:</b> %1</p>"
                 "<p>Developed by: <b>mapi68</b></p>"
-            ).replace("%1", VERSION),
+            ).replace("%1", Config.VERSION),
         )
 
     def confirm_and_delete_all_backups(self):
@@ -1979,7 +2020,7 @@ class MainWindow(QMainWindow):
 
         description = "N/A"
         icon_count = "N/A"
-        filepath = os.path.join(BACKUP_DIR, latest_backup_file)
+        filepath = os.path.join(Config.BACKUP_DIR, latest_backup_file)
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -2151,7 +2192,7 @@ class MainWindow(QMainWindow):
                 )
             cleanup_limit = self.settings.value("cleanup_limit", 0, type=int)
             self.manager.save(
-                lambda msg: print(f"Auto-Save Log: {msg}"),
+                lambda msg: print(f"{self.tr('Auto-Save Log')}: {msg}"),
                 description=self.tr("Auto-Save on Exit"),
                 max_backup_count=cleanup_limit,
             )
@@ -2170,7 +2211,7 @@ class MainWindow(QMainWindow):
                     "Application minimized to system tray. Click or double-click to restore."
                 ),
                 QSystemTrayIcon.MessageIcon.Information,
-                2000,
+                Config.TRAY_NOTIFICATION_DURATION,
             )
             return
 
@@ -2216,13 +2257,13 @@ class MainWindow(QMainWindow):
             </tr>
         </table>
         <br>
-        <p style='color: #666; font-size: 11px;'>{self.tr("Tip: Hover over buttons to see additional shortcuts in tooltips.")}</p>
+        <p style='color: {Config.COLOR_TEXT_DIM}; font-size: 11px;'>{self.tr("Tip: Hover over buttons to see additional shortcuts in tooltips.")}</p>
         """
 
         dialog = QDialog(self)
         dialog.setWindowTitle(self.tr("Keyboard Shortcuts"))
-        dialog.setMinimumWidth(400)
-        dialog.setMinimumHeight(350)
+        dialog.setMinimumWidth(Config.SHORTCUTS_DIALOG_MIN_WIDTH)
+        dialog.setMinimumHeight(Config.SHORTCUTS_DIALOG_MIN_HEIGHT)
 
         layout = QVBoxLayout(dialog)
 
@@ -2336,7 +2377,7 @@ if __name__ == "__main__":
                 window.tr("Desktop Icon Manager"),
                 window.tr("Application started minimized to system tray."),
                 QSystemTrayIcon.MessageIcon.Information,
-                2000,
+                Config.TRAY_NOTIFICATION_DURATION,
             )
         else:
             window.show()
