@@ -596,7 +596,7 @@ Sei sicuro di voler procedere?</translation>
     <message>
         <location filename="..\desktop-icon-backup-manager.py" line="1525" />
         <source>Restore Latest</source>
-        <translation>Ripristina più recentE</translation>
+        <translation>Ripristina più recente</translation>
     </message>
     <message>
         <location filename="..\desktop-icon-backup-manager.py" line="1531" />
