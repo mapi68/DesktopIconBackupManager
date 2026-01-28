@@ -12,7 +12,7 @@ except Exception:
     VERSIONE = "0.0.0"
 # ------------------------------------------
 
-py_files = glob.glob("*.py")
+py_files = glob.glob("**/*.py", recursive=True)
 
 a = Analysis(
     py_files,
@@ -20,7 +20,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('icon.ico', '.'),
-        ('i18n/*', 'i18n'),
+        ('i18n/*.qm', 'i18n'),
         ('version.txt', '.')
     ],
     hiddenimports=[],

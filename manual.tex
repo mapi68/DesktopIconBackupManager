@@ -17,6 +17,7 @@
 \usepackage{float}
 \usepackage{parskip}
 \usepackage{needspace}
+\usepackage{pmboxdraw}
 
 \DeclareUnicodeCharacter{2194}{\ensuremath{\leftrightarrow}}
 
@@ -1893,6 +1894,50 @@ The program uses Qt's translation system for internationalization:
     \item English (en)
     \item Italian (it)
   \end{itemize}
+
+\section{Directory Structure}
+
+\begin{center}
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+desktop-icon-backup-manager/
+│
+├── Python Modules
+│   ├── main.py                Entry point (run this!)
+│   ├── config.py              Configuration & constants
+│   ├── icon_manager.py        Core functionality
+│   │
+│   ├── ui/                    User interface
+│   │   ├── main_window.py     - Main window
+│   │   ├── backup_dialog.py   - Backup manager
+│   │   └── preview_widget.py  - Icon preview
+│   │
+│   └── utils/                 Utilities
+│       ├── helpers.py         - Helper functions
+│       └── threads.py         - Worker threads
+│
+├── Localization
+│   └── i18n/                  Translations (Italian, etc.)
+│
+├── Resources
+│   ├── images/                Screenshots for docs
+│   ├── icon.ico               Icon file
+│   └── icon.png               Icon file
+│
+└── Configuration
+│    ├── requirements.txt      Python dependencies
+│    ├── compile.spec          PyInstaller config
+│    ├── version.txt           Version number
+│    └── LICENSE               MIT License
+│
+├── Documentation
+│   ├── README.md              Project overview
+│   ├── manual.tex             Latex User Manual
+│   └── about.txt              Quick info
+│
+\end{verbatim}
+\end{minipage}
+\end{center}
 
 \section{Technical Information}
 

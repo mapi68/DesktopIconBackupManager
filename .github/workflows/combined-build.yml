@@ -1,4 +1,4 @@
-name: Combined Build and Documentation
+name: Combined Build Release and Build PDF Manual
 
 on:
   workflow_dispatch: # Allows manual trigger from the Actions tab
@@ -6,7 +6,7 @@ on:
 jobs:
   # Job 1: Triggers the Windows EXE build
   build-executable:
-    uses: ./.github/workflows/build-exe.yml
+    uses: ./.github/workflows/build-release.yml
     permissions:
       contents: write
       packages: write

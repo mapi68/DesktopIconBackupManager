@@ -1,4 +1,4 @@
-name: Manual LaTeX Compilation
+name: Build PDF Manual
 
 on:
   workflow_dispatch:
@@ -19,10 +19,7 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: desktop-icon-backup-manager.tex
-
-      - name: Rename PDF to manual.pdf
-        run: mv desktop-icon-backup-manager.pdf manual.pdf
+          root_file: manual.tex
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
